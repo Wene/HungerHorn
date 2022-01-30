@@ -127,8 +127,10 @@ OTHER_FILES += platformio.ini
 CONFIG += c++11
 
 SOURCES += \
+    src/config.cpp \
     src/main.cpp \
     src/player.cpp
 
 HEADERS += \
+    src/config.h \
     src/player.h

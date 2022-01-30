@@ -1,13 +1,11 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <Preferences.h>
 
 #include "player.h"
-
+#include "config.h"
 
 static Player player;
-
-static Preferences settings;
+static Config config;
 
 void setup()
 {
@@ -17,9 +15,14 @@ void setup()
   WiFi.mode(WIFI_MODE_STA);
   WiFi.disconnect();
 
-  settings.begin("settings");
-
   player.setup();
+  config.setup();
+
+  String wifi_name(config.get_wifi_ssid());
+  String wifi_key(config.get_wifi_psk());
+
+  Serial.println(wifi_name);
+  Serial.println(wifi_key);
 
   Serial.println(F("Setup done."));
 }
@@ -28,7 +31,7 @@ void setup()
 #define BACKSPACE 127
 #define ESC 27
 
-void scan()
+static void scan()
 {
   Serial.println(F("Scanning for WiFi networks..."));
   int num_net = WiFi.scanNetworks();
@@ -103,6 +106,7 @@ void scan()
     Serial.println(F("not available"));
   }
 }
+
 
 
 void loop()
