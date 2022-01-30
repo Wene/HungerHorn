@@ -16,7 +16,6 @@ void setup()
   WiFi.disconnect();
 
   player.setup();
-  config.setup();
 
   String wifi_name(config.get_wifi_ssid());
   String wifi_key(config.get_wifi_psk());
@@ -107,10 +106,10 @@ static void scan()
   }
 }
 
-
-
 void loop()
 {
+
+
   Serial.println(F("Press \"s\" to start a network scan"));
   for(int i = 0; i < 100; i++)
   {
