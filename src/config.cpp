@@ -3,6 +3,7 @@
 
 static Preferences settings;
 
+static const char *settings_name = "settings";
 static const char *psk_name = "psk";
 static const char *ssid_name = "ssid";
 static const char *ntp_name = "ntp";
@@ -11,7 +12,11 @@ static const char *dst_name = "dst_offset";
 
 Config::Config(): ssid("unset"), psk("---"), ntp_server("pool.ntp.org"), utc_offset_secs(0), dst_offset_secs(0)
 {
-  settings.begin("settings");
+}
+
+void Config::setup()
+{
+  settings.begin(settings_name);
 
   if(settings.isKey(ssid_name))
   {

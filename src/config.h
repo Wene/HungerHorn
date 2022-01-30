@@ -6,6 +6,7 @@ class Config
 {
 public:
   Config();
+  void setup();
   void store_wifi_settings(const String &name, const String &key);
   void store_clock_settings(const String &ntp_server_address, long utc_offset, int dst_offset);
   const String &get_wifi_ssid();
