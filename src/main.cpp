@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <time.h>
 
 #include "player.h"
 #include "config.h"
@@ -7,30 +8,57 @@
 static Player player;
 static Config config;
 
-void setup()
+static void wifi_setup()
 {
-  Serial.begin(115200);
-  Serial.println(F("Starting..."));
-
   WiFi.mode(WIFI_MODE_STA);
   WiFi.disconnect();
-
-  player.setup();
 
   String wifi_name(config.get_wifi_ssid());
   String wifi_key(config.get_wifi_psk());
 
-  Serial.println(wifi_name);
-  Serial.println(wifi_key);
+  Serial.print(F("Connecting to WLAN \""));
+  Serial.print(wifi_name);
+  Serial.print(F("\" using key \""));
+  Serial.print(wifi_key);
+  Serial.print("\"");
+  WiFi.begin(wifi_name.c_str(), wifi_key.c_str());
 
-  Serial.println(F("Setup done."));
+  bool connected = false;
+  for(int i = 0; i < 30; i++)
+  {
+    if(WL_CONNECTED == WiFi.status())
+    {
+      connected = true;
+      break;
+    }
+    Serial.print(".");
+    delay(500);
+  }
+
+  if(connected)
+  {
+    Serial.println(F("success"));
+  }
+  else
+  {
+    Serial.println(F("failed"));
+    WiFi.disconnect();
+  }
 }
 
 #define ENTER 13
 #define BACKSPACE 127
 #define ESC 27
 
-static void scan()
+static void terminal_backspace()
+{
+  Serial.write(ESC);
+  Serial.print("[D");
+  Serial.write(ESC);
+  Serial.print("[K");
+}
+
+static void wifi_scan()
 {
   Serial.println(F("Scanning for WiFi networks..."));
   int num_net = WiFi.scanNetworks();
@@ -61,10 +89,7 @@ static void scan()
         if(1 <= len)
         {
           input = input.substring(0, len-1);
-          Serial.write(ESC);
-          Serial.print("[D");
-          Serial.write(ESC);
-          Serial.print("[K");
+          terminal_backspace();
         }
       }
       else if(ENTER == in)
@@ -83,6 +108,7 @@ static void scan()
     Serial.print(net_name);
     Serial.println("\"");
     Serial.print(F("Enter the WLAN key: "));
+    String key;
     while(true)
     {
       if(Serial.available())
@@ -93,12 +119,24 @@ static void scan()
           Serial.println();
           break;
         }
+        else if(BACKSPACE == in)
+        {
+          int len = key.length();
+          if(1 <= len)
+          {
+            key = key.substring(0, len-1);
+            terminal_backspace();
+          }
+        }
         else
         {
+          key += String((char)in);
           Serial.write(in);
         }
       }
     }
+    config.store_wifi_settings(net_name, key);
+    wifi_setup();
   }
   else
   {
@@ -106,10 +144,20 @@ static void scan()
   }
 }
 
+void setup()
+{
+  Serial.begin(115200);
+  Serial.println(F("Starting..."));
+
+  player.setup();
+
+  wifi_setup();
+
+  Serial.println(F("Setup done."));
+}
+
 void loop()
 {
-
-
   Serial.println(F("Press \"s\" to start a network scan"));
   for(int i = 0; i < 100; i++)
   {
@@ -118,7 +166,7 @@ void loop()
       int character = Serial.read();
       if(character == 's')
       {
-        scan();
+        wifi_scan();
         break;
       }
     }
