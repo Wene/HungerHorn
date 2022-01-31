@@ -55,6 +55,10 @@ static void menu_selection(const String &input)
   {
     scanner_scan(wifi_setup);
   }
+  else
+  {
+    terminal.input(menu_selection);
+  }
 }
 
 void setup()
@@ -65,22 +69,15 @@ void setup()
 
   wifi_setup();
 
-  terminal.input(menu_selection);
+  terminal.input(menu_selection); // TODO: this works only once like this
   scanner_set_terminal_and_config(&terminal, &config);
 
   Serial.println(F("Setup done."));
+  Serial.println(F("Enter \"w\" to start a WiFi scan"));
 }
 
 void loop()
 {
-  static unsigned int timer = millis();
-  unsigned int now = millis();
-  if(now > timer + 10000)
-  {
-    timer = now;
-    Serial.println(F("Enter \"w\" to start a WiFi scan"));
-  }
-
   terminal.tick();
 
 //  if(Serial.available())

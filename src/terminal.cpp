@@ -38,9 +38,9 @@ void Terminal::tick()
     if(ENTER == in_char)
     {
       Serial.println();
+      input_active = false;
       input_callback(buffer);
       buffer.clear();
-      input_active = false;
     }
     else
     {
