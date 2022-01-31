@@ -129,8 +129,12 @@ CONFIG += c++11
 SOURCES += \
     src/config.cpp \
     src/main.cpp \
-    src/player.cpp
+    src/player.cpp \
+    src/scanner.cpp \
+    src/terminal.cpp
 
 HEADERS += \
     src/config.h \
-    src/player.h
+    src/player.h \
+    src/scanner.h \
+    src/terminal.h
