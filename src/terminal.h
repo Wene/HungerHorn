@@ -21,3 +21,4 @@ private:
   tCB_string input_callback;
 };
 
+extern Terminal terminal;

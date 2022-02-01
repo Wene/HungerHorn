@@ -23,3 +23,4 @@ private:
   int dst_offset_secs;
 };
 
+extern Config config;

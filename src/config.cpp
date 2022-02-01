@@ -86,3 +86,5 @@ void Config::store_clock_settings(const String &ntp_server_address, long utc_off
   settings.putLong(utc_offs_name, utc_offset_secs);
   settings.putInt(dst_name, dst_offset_secs);
 }
+
+Config config;

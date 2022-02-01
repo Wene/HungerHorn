@@ -2,23 +2,18 @@
 
 #include <WiFi.h>
 
-static Terminal *terminal;
-static Config *config;
+#include "terminal.h"
+#include "config.h"
+
 static int num_net;
 static String net_name;
 static String net_password;
 static tScanner_callback scanner_callback;
 
-void scanner_set_terminal_and_config(Terminal *term, Config *conf)
-{
-  terminal = term;
-  config = conf;
-}
-
 static void net_pw(const String &input)
 {
   net_password = input;
-  config->store_wifi_settings(net_name, net_password);
+  config.store_wifi_settings(net_name, net_password);
   scanner_callback();
 }
 
@@ -33,7 +28,7 @@ static void net_select(const String &input)
   Serial.print(F("Enter the network password for \""));
   Serial.print(net_name);
   Serial.print("\": ");
-  terminal->input(net_pw);
+  terminal.input(net_pw);
 }
 
 void scanner_scan(tScanner_callback callback)
@@ -51,5 +46,5 @@ void scanner_scan(tScanner_callback callback)
     Serial.println(net_name);
   }
   Serial.print(F("Enter the number of your choice: "));
-  terminal->input(net_select);
+  terminal.input(net_select);
 }

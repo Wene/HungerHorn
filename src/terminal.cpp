@@ -72,3 +72,5 @@ void Terminal::clear_buffer()
     Serial.read();
   }
 }
+
+Terminal terminal;

@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <WiFi.h>
-#include <time.h>
 
 #include "player.h"
 #include "config.h"
@@ -8,8 +7,6 @@
 #include "scanner.h"
 
 static Player player;
-static Config config;
-static Terminal terminal;
 
 static void wifi_setup()
 {
@@ -41,6 +38,7 @@ static void wifi_setup()
   if(connected)
   {
     Serial.println(F("success"));
+    configTime(config.get_utc_offset_secs(), config.get_dst_offset_secs(), config.get_ntp_server().c_str());
   }
   else
   {
@@ -61,6 +59,20 @@ static void menu_selection(const String &input)
   }
 }
 
+/*
+Tuesday, February 01 2022 20:07:32
+Day of week: Tuesday
+Month: February
+Day of Month: 01
+Year: 2022
+Hour: 20
+Hour (12 hour format): 08
+Minute: 07
+Second: 32
+Time variables
+20
+Tuesday
+*/
 static void printLocalTime(){
   struct tm timeinfo;
   if(!getLocalTime(&timeinfo)){
@@ -102,10 +114,8 @@ void setup()
   player.setup();
 
   wifi_setup();
-  configTime(config.get_utc_offset_secs(), config.get_dst_offset_secs(), config.get_ntp_server().c_str());
 
   terminal.input(menu_selection); // TODO: this works only once like this
-  scanner_set_terminal_and_config(&terminal, &config);
 
   Serial.println(F("Setup done."));
   Serial.println(F("Enter \"w\" to start a WiFi scan"));
