@@ -14,10 +14,6 @@ static void menu_selection(const String &input)
   {
     network.scan();
   }
-  else
-  {
-    terminal.menu();
-  }
 }
 
 /*

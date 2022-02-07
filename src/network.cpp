@@ -88,7 +88,6 @@ void Network::password(const String &input)
   psk = input;
   config.store_wifi_settings(ssid, psk);
   connect();
-  terminal.menu();
 }
 
 Network network;

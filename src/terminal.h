@@ -12,7 +12,6 @@ public:
   void tick();
   void input(std::function<void(const String&)> callback);
   void menu(std::function<void(const String&)> callback);
-  void menu();
 
 private:
   void backspace();
