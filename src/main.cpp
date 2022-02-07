@@ -16,7 +16,7 @@ static void menu_selection(const String &input)
   }
   else
   {
-    terminal.input(menu_selection);
+    terminal.menu();
   }
 }
 
@@ -75,7 +75,7 @@ void setup()
   player.setup();
   network.setup();
 
-  terminal.input(menu_selection); // TODO: this works only once like this
+  terminal.menu(menu_selection);
 
   Serial.println(F("Setup done."));
   Serial.println(F("Enter \"w\" to start a WiFi scan"));

@@ -50,6 +50,17 @@ void Terminal::tick()
   }
 }
 
+void Terminal::menu(std::function<void (const String &)> callback)
+{
+  menu_callback = callback;
+  input(menu_callback);
+}
+
+void Terminal::menu()
+{
+  input(menu_callback);
+}
+
 void Terminal::input(std::function<void(const String&)> callback)
 {
   input_active = true;

@@ -11,6 +11,8 @@ public:
   void setup();
   void tick();
   void input(std::function<void(const String&)> callback);
+  void menu(std::function<void(const String&)> callback);
+  void menu();
 
 private:
   void backspace();
@@ -19,6 +21,7 @@ private:
   String buffer;
   bool input_active;
   std::function<void(const String&)> input_callback;
+  std::function<void(const String&)> menu_callback;
 };
 
 extern Terminal terminal;
