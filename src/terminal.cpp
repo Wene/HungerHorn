@@ -50,7 +50,7 @@ void Terminal::tick()
   }
 }
 
-void Terminal::input(tCB_string callback)
+void Terminal::input(std::function<void(const String&)> callback)
 {
   input_active = true;
   clear_buffer();

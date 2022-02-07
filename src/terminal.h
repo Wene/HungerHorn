@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Arduino.h>
+#include <functional>
 
-typedef void (*tCB_string)(const String &);
 
 class Terminal
 {
@@ -10,7 +10,7 @@ public:
   Terminal();
   void setup();
   void tick();
-  void input(tCB_string callback);
+  void input(std::function<void(const String&)> callback);
 
 private:
   void backspace();
@@ -18,7 +18,7 @@ private:
 
   String buffer;
   bool input_active;
-  tCB_string input_callback;
+  std::function<void(const String&)> input_callback;
 };
 
 extern Terminal terminal;

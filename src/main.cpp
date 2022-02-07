@@ -4,54 +4,15 @@
 #include "player.h"
 #include "config.h"
 #include "terminal.h"
-#include "scanner.h"
+#include "network.h"
 
 static Player player;
-
-static void wifi_setup()
-{
-  WiFi.mode(WIFI_MODE_STA);
-  WiFi.disconnect();
-
-  String wifi_name(config.get_wifi_ssid());
-  String wifi_key(config.get_wifi_psk());
-
-  Serial.print(F("Connecting to WLAN \""));
-  Serial.print(wifi_name);
-  Serial.print(F("\" using key \""));
-  Serial.print(wifi_key);
-  Serial.print("\"");
-  WiFi.begin(wifi_name.c_str(), wifi_key.c_str());
-
-  bool connected = false;
-  for(int i = 0; i < 30; i++)
-  {
-    if(WL_CONNECTED == WiFi.status())
-    {
-      connected = true;
-      break;
-    }
-    Serial.print(".");
-    delay(500);
-  }
-
-  if(connected)
-  {
-    Serial.println(F("success"));
-    configTime(config.get_utc_offset_secs(), config.get_dst_offset_secs(), config.get_ntp_server().c_str());
-  }
-  else
-  {
-    Serial.println(F("failed"));
-    WiFi.disconnect();
-  }
-}
 
 static void menu_selection(const String &input)
 {
   if(input == "w")
   {
-    scanner_scan(wifi_setup);
+    network.scan();
   }
   else
   {
@@ -112,8 +73,7 @@ void setup()
   terminal.setup();
   config.setup();
   player.setup();
-
-  wifi_setup();
+  network.setup();
 
   terminal.input(menu_selection); // TODO: this works only once like this
 
