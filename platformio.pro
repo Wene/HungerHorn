@@ -127,6 +127,7 @@ OTHER_FILES += platformio.ini
 CONFIG += c++11
 
 SOURCES += \
+    src/alarmclock.cpp \
     src/config.cpp \
     src/main.cpp \
     src/network.cpp \
@@ -134,6 +135,7 @@ SOURCES += \
     src/terminal.cpp
 
 HEADERS += \
+    src/alarmclock.h \
     src/config.h \
     src/network.h \
     src/player.h \
