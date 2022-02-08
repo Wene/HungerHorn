@@ -1,5 +1,6 @@
 #include "alarmclock.h"
 #include <functional>
+#include <time.h>
 #include "config.h"
 #include "terminal.h"
 
@@ -13,10 +14,15 @@ void AlarmClock::setup()
 
 void AlarmClock::tick()
 {
-  if(!getLocalTime(&timeinfo)){
-    Serial.println(F("Failed to obtain time"));
-    return;
+  unsigned long now = millis();
+  if(now > last_print + 10000)
+  {
+    last_print = now;
+//    time_t timestamp = time(NULL);
+//    struct tm *loc_time = localtime(&timestamp);
+//    printLocalTime(loc_time);
   }
+
   // TODO: react on set time
 }
 
@@ -80,32 +86,32 @@ Time variables
 20
 Tuesday
 */
-void AlarmClock::printLocalTime()
+void AlarmClock::printLocalTime(struct tm *timeinfo)
 {
-  Serial.println(&timeinfo, "%A, %B %d %Y %H:%M:%S");
+  Serial.println(timeinfo, "%A, %B %d %Y %H:%M:%S");
   Serial.print("Day of week: ");
-  Serial.println(&timeinfo, "%A");
+  Serial.println(timeinfo, "%A");
   Serial.print("Month: ");
-  Serial.println(&timeinfo, "%B");
+  Serial.println(timeinfo, "%B");
   Serial.print("Day of Month: ");
-  Serial.println(&timeinfo, "%d");
+  Serial.println(timeinfo, "%d");
   Serial.print("Year: ");
-  Serial.println(&timeinfo, "%Y");
+  Serial.println(timeinfo, "%Y");
   Serial.print("Hour: ");
-  Serial.println(&timeinfo, "%H");
+  Serial.println(timeinfo, "%H");
   Serial.print("Hour (12 hour format): ");
-  Serial.println(&timeinfo, "%I");
+  Serial.println(timeinfo, "%I");
   Serial.print("Minute: ");
-  Serial.println(&timeinfo, "%M");
+  Serial.println(timeinfo, "%M");
   Serial.print("Second: ");
-  Serial.println(&timeinfo, "%S");
+  Serial.println(timeinfo, "%S");
 
   Serial.println("Time variables");
   char timeHour[3];
-  strftime(timeHour,3, "%H", &timeinfo);
+  strftime(timeHour,3, "%H", timeinfo);
   Serial.println(timeHour);
   char timeWeekDay[10];
-  strftime(timeWeekDay,10, "%A", &timeinfo);
+  strftime(timeWeekDay,10, "%A", timeinfo);
   Serial.println(timeWeekDay);
   Serial.println();
 }
