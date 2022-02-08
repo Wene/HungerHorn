@@ -46,6 +46,7 @@ void setup()
   alarmclock.setup();
 
   Serial.println(F("Setup done."));
+  menu_display();
 }
 
 void loop()

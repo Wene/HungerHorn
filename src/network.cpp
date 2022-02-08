@@ -79,12 +79,16 @@ void Network::select(const String &input)
   if(net_number >= 0 && net_number < num_net)
   {
     ssid = WiFi.SSID(net_number);
-  }
 
-  Serial.print(F("Enter the network password for \""));
-  Serial.print(ssid);
-  Serial.print("\": ");
-  terminal.input(std::bind(&Network::password, this, std::placeholders::_1));
+    Serial.print(F("Enter the network password for \""));
+    Serial.print(ssid);
+    Serial.print("\": ");
+    terminal.input(std::bind(&Network::password, this, std::placeholders::_1));
+  }
+  else
+  {
+    Serial.println(F("Invalid selection"));
+  }
 }
 
 void Network::password(const String &input)

@@ -39,6 +39,10 @@ void Terminal::tick()
         input_callback(buffer);
       }
       buffer.clear();
+      if(!active)
+      {
+        menu_callback();
+      }
     }
     else
     {
