@@ -23,14 +23,14 @@ void Terminal::tick()
     int in_char = Serial.read();
     if(BACKSPACE == in_char)
     {
-      int len = buffer.length();
+      unsigned len = buffer.length();
       if(0 < len)
       {
         buffer = buffer.substring(0, len-1);
         backspace();
       }
     }
-    if(ENTER == in_char)
+    else if(ENTER == in_char)
     {
       Serial.println();
       if(input_callback)
