@@ -3,24 +3,22 @@
 #include <Arduino.h>
 #include <functional>
 
-
 class Terminal
 {
 public:
-  Terminal();
-  void setup();
+  void setup(std::function<void(void)> callback);
   void tick();
   void input(std::function<void(const String&)> callback);
-  void menu(std::function<void(const String&)> callback);
 
 private:
   void backspace();
-  void clear_buffer();
+  void clear_serial_buffer();
 
+  unsigned long last_interaction;
   String buffer;
-  bool input_active;
+  bool active;
   std::function<void(const String&)> input_callback;
-  std::function<void(const String&)> menu_callback;
+  std::function<void(void)> menu_callback;
 };
 
 extern Terminal terminal;

@@ -9,6 +9,8 @@
 
 static Player player;
 
+static void menu_display();
+
 static void menu_selection(const String &input)
 {
   if(input == "w")
@@ -19,43 +21,35 @@ static void menu_selection(const String &input)
   {
     alarmclock.config_start();
   }
+  else
+  {
+    Serial.print(F("Selection \""));
+    Serial.print(input);
+    Serial.println(F("\" not found."));
+    menu_display();
+  }
+}
+
+static void menu_display()
+{
+  Serial.println();
+  Serial.println(F("Enter \"w\" to start a WiFi scan or \"c\" to setup the clock"));
+  terminal.input(menu_selection);
 }
 
 void setup()
 {
-  terminal.setup();
+  terminal.setup(menu_display);
   config.setup();
   player.setup();
   network.setup();
   alarmclock.setup();
 
-  terminal.menu(menu_selection);
-
   Serial.println(F("Setup done."));
-  Serial.println(F("Enter \"w\" to start a WiFi scan or \"c\" to setup the clock"));
 }
 
 void loop()
 {
-  static unsigned long last_time = millis();
-  unsigned int now = millis();
   terminal.tick();
   alarmclock.tick();
-
-  if(now > last_time + 5000)
-  {
-    last_time = now;
-    alarmclock.printLocalTime();
-  }
-
-//  if(Serial.available())
-//  {
-//    int input = Serial.read();
-//    if(input >= '1' && input <= '9')
-//    {
-//      int track = input - '0';
-//      player.play_track(track);
-//    }
-//  }
-//  player.print_state();
 }
