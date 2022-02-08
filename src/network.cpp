@@ -64,12 +64,17 @@ void Network::scan()
     String name = String(i) + ": " + WiFi.SSID(i);
     Serial.println(name);
   }
-  Serial.print(F("Enter the number of your choice: "));
+  Serial.print(F("Enter the number of your choice or just hit enter to abort: "));
   terminal.input(std::bind(&Network::select, this, std::placeholders::_1));
 }
 
 void Network::select(const String &input)
 {
+  if(input.isEmpty())
+  {
+    return;
+  }
+
   int net_number = input.toInt();
   if(net_number >= 0 && net_number < num_net)
   {
