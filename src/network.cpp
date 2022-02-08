@@ -44,9 +44,6 @@ void Network::connect()
   if(connected)
   {
     Serial.println(F("success"));
-
-    // TODO: move to alarmclock
-    configTime(config.get_utc_offset_secs(), config.get_dst_offset_secs(), config.get_ntp_server().c_str());
   }
   else
   {

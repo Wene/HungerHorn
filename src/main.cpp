@@ -15,6 +15,10 @@ static void menu_selection(const String &input)
   {
     network.scan();
   }
+  else if(input == "c")
+  {
+    alarmclock.config_start();
+  }
 }
 
 void setup()
@@ -28,7 +32,7 @@ void setup()
   terminal.menu(menu_selection);
 
   Serial.println(F("Setup done."));
-  Serial.println(F("Enter \"w\" to start a WiFi scan"));
+  Serial.println(F("Enter \"w\" to start a WiFi scan or \"c\" to setup the clock"));
 }
 
 void loop()
