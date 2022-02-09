@@ -21,6 +21,15 @@ static void menu_selection(const String &input)
   {
     alarmclock.config_start();
   }
+  else if(input == "a")
+  {
+    // TODO: implement this
+  }
+  else if(input == "t")
+  {
+    alarmclock.print_time();
+    menu_display();
+  }
   else
   {
     Serial.print(F("Selection \""));
@@ -33,7 +42,11 @@ static void menu_selection(const String &input)
 static void menu_display()
 {
   Serial.println();
-  Serial.println(F("Enter \"w\" to start a WiFi scan or \"c\" to setup the clock"));
+  Serial.println(F("Menu - enter the letter in front of the entry"));
+  Serial.println(F("w - WiFi scan and configuration"));
+  Serial.println(F("c - clock setup (NTP server, time zone)"));
+  Serial.println(F("a - alarm time settings"));
+  Serial.println(F("t - display the current time"));
   terminal.input(menu_selection);
 }
 

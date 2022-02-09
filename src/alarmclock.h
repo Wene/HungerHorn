@@ -8,9 +8,9 @@ public:
   void setup();
   void tick();
   void config_start();
+  void print_time();
 
 private:
-  void printLocalTime(tm *timeinfo);
   void config_ntp(const String& input);
   void config_utc(const String& input);
   void config_dst(const String& input);
