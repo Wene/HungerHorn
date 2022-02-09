@@ -23,7 +23,7 @@ static void menu_selection(const String &input)
   }
   else if(input == "a")
   {
-    // TODO: implement this
+    alarmclock.alarm_setup_start();
   }
   else if(input == "t")
   {

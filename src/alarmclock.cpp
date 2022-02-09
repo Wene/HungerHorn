@@ -72,12 +72,47 @@ void AlarmClock::config_dst(const String &input)
   configTime(utc_offset, dst_offset, ntp_server.c_str());
 }
 
+void AlarmClock::alarm_setup_start()
+{
+  TimeConfig alarm = config.get_alarm_settings();
+  char cur_alarm[10];
+  snprintf(cur_alarm, sizeof(cur_alarm), "%02d:%02d:%02d", alarm.hour, alarm.min, alarm.sec);
+  Serial.print(F("The alarm is currently set to "));
+  Serial.println(cur_alarm);
+  Serial.print(F("Enter the new alarm time: "));
+  terminal.input(std::bind(&AlarmClock::alarm_setup, this, std::placeholders::_1));
+}
+
+void AlarmClock::alarm_setup(const String &input)
+{
+  if(input.isEmpty())
+  {
+    return;
+  }
+
+  int pos = input.indexOf(':');
+  if(0 >= pos) return;
+  String hour_str = input.substring(0, pos);
+  String rest = input.substring(pos+1);
+  pos = rest.indexOf(':');
+  if(0 >= pos) return;
+  String min_str = rest.substring(0, pos);
+  String sec_str = rest.substring(pos+1);
+
+  TimeConfig alarm;
+  alarm.hour = hour_str.toInt();
+  alarm.min = min_str.toInt();
+  alarm.sec = sec_str.toInt();
+
+  config.store_alarm_settings(alarm);
+}
+
 void AlarmClock::print_time()
 {
   time_t timestamp = time(NULL);
   struct tm *timeinfo = localtime(&timestamp);
 
-  Serial.println(timeinfo, "%Y-%B-&d %H:%M:%S");
+  Serial.println(timeinfo, "%Y-%m-%d %H:%M:%S");
 }
 
 AlarmClock alarmclock;
