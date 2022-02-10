@@ -47,8 +47,8 @@ void AlarmClock::config_ntp(const String &input)
     ntp_server = input;
   }
 
-  Serial.print(F("The current UTC offset in seconds is "));
-  Serial.println(utc_offset);
+  Serial.print(F("The current UTC offset in minutes is "));
+  Serial.println(utc_offset / 60);
   Serial.print(F("Enter the new value or just hit enter to keep the value: "));
   terminal.input(std::bind(&AlarmClock::config_utc, this, std::placeholders::_1));
 }
@@ -57,12 +57,19 @@ void AlarmClock::config_utc(const String &input)
 {
   if(!input.isEmpty())
   {
-    utc_offset = input.toInt();
+    utc_offset = input.toInt() * 60;
   }
 
-  Serial.print(F("The current daylight savint time offset in seconds is "));
-  Serial.println(dst_offset);
-  Serial.print(F("Enter the new value or just hit enter to keep the value: "));
+  Serial.print(F("Daylight saving time is "));
+  if(dst_offset)
+  {
+    Serial.println(F("enabled"));
+  }
+  else
+  {
+    Serial.println(F("disabled"));
+  }
+  Serial.print(F("Enter 1 to enable or 0 to disable. Hit enter to keep the setting: "));
   terminal.input(std::bind(&AlarmClock::config_dst, this, std::placeholders::_1));
 }
 
@@ -70,7 +77,15 @@ void AlarmClock::config_dst(const String &input)
 {
   if(!input.isEmpty())
   {
-    dst_offset = input.toInt();
+    int enable_dst = input.toInt();
+    if(enable_dst)
+    {
+      dst_offset = 3600;
+    }
+    else
+    {
+      dst_offset = 0;
+    }
   }
 
   config.store_clock_settings(ntp_server, utc_offset, dst_offset);
@@ -100,9 +115,16 @@ void AlarmClock::alarm_setup(const String &input)
   String hour_str = input.substring(0, pos);
   String rest = input.substring(pos+1);
   pos = rest.indexOf(':');
-  if(0 >= pos) return;
-  String min_str = rest.substring(0, pos);
-  String sec_str = rest.substring(pos+1);
+  String min_str, sec_str;
+  if(0 >= pos)
+  {
+    min_str = rest;
+  }
+  else
+  {
+    min_str = rest.substring(0, pos);
+    sec_str = rest.substring(pos+1);
+  }
 
   TimeConfig alarm;
   alarm.hour = hour_str.toInt();
