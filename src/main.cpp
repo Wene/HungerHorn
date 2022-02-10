@@ -52,9 +52,9 @@ void setup()
 {
   terminal.setup(menu_display);
   config.setup();
-  player.setup();
   network.setup();
   alarmclock.setup();
+  player.setup();
 
   Serial.println(F("Setup done."));
   menu_display();
