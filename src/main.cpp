@@ -7,8 +7,6 @@
 #include "network.h"
 #include "alarmclock.h"
 
-static Player player;
-
 static void menu_display();
 
 static void menu_selection(const String &input)

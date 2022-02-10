@@ -19,7 +19,7 @@ private:
   String ntp_server;
   long utc_offset;
   int dst_offset;
-  unsigned long last_print;
+  unsigned long last_update;
 };
 
 

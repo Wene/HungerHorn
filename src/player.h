@@ -17,3 +17,4 @@ private:
   player_impl *impl;
 };
 
+extern Player player;

@@ -128,3 +128,4 @@ void player_impl::printDetail(uint8_t type, uint16_t value)
   }
 }
 
+Player player;

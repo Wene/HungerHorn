@@ -3,6 +3,7 @@
 #include <time.h>
 #include "config.h"
 #include "terminal.h"
+#include "player.h"
 
 void AlarmClock::setup()
 {
@@ -15,15 +16,16 @@ void AlarmClock::setup()
 void AlarmClock::tick()
 {
   unsigned long now = millis();
-  if(now > last_print + 10000)
+  if(now >= last_update + 1000)
   {
-    last_print = now;
-//    time_t timestamp = time(NULL);
-//    struct tm *loc_time = localtime(&timestamp);
-//    printLocalTime(loc_time);
+    TimeConfig alarm = config.get_alarm_settings();
+    time_t clock = time(NULL);
+    struct tm *timeinfo = localtime(&clock);
+    if(alarm.hour == timeinfo->tm_hour && alarm.min == timeinfo->tm_min && alarm.sec == timeinfo->tm_sec)
+    {
+      player.play_track(1);
+    }
   }
-
-  // TODO: react on set time
 }
 
 void AlarmClock::config_start()
