@@ -12,21 +12,53 @@ static const char *dst_name = "dst_offset";
 static const char *alarm_time_prefix = "alarm_time_";
 static const char *alarm_sound_prefix = "alarm_sound_";
 
-void Alarm::time_int(int32_t seconds)
+int Alarm::hour()
 {
-  hour = seconds / 3600;
-  seconds %= 3600;
-  min = seconds / 60;
-  sec = seconds % 60;
+  return secs_in_day / 3600;
 }
 
-int32_t Alarm::time_int()
+int Alarm::min()
 {
-  int32_t seconds = sec;
-  seconds += min * 60;
-  seconds += hour * 3600;
-  return seconds;
+  int min_sec = secs_in_day % 3600;
+  return min_sec / 60;
 }
+
+int Alarm::sec()
+{
+  int min_sec = secs_in_day % 3600;
+  return min_sec % 60;
+}
+
+void Alarm::hour(int new_val)
+{
+  int hour = new_val;
+  int rest = secs_in_day % 3600;
+  int min = rest / 60;
+  int sec = rest % 60;
+
+  secs_in_day = hour * 3600 + min * 60 + sec;
+}
+
+void Alarm::min(int new_val)
+{
+  int hour = secs_in_day / 3600;
+  int rest = secs_in_day % 3600;
+  int min = new_val;
+  int sec = rest % 60;
+
+  secs_in_day = hour * 3600 + min * 60 + sec;
+}
+
+void Alarm::sec(int new_val)
+{
+  int hour = secs_in_day / 3600;
+  int rest = secs_in_day % 3600;
+  int min = rest / 60;
+  int sec = new_val;
+
+  secs_in_day = hour * 3600 + min * 60 + sec;
+}
+
 
 Config::Config(): ssid("unset"), psk("---"), ntp_server("pool.ntp.org"), utc_offset_secs(0), dst_offset_secs(0)
 {
@@ -67,7 +99,7 @@ void Config::setup()
     time_key += i;
     if(settings.isKey(time_key.c_str()))
     {
-      alarm[i].time_int(settings.getInt(time_key.c_str()));
+      alarm[i].secs_in_day = settings.getInt(time_key.c_str());
     }
     String sound_key(alarm_sound_prefix);
     sound_key += i;
@@ -98,7 +130,7 @@ Alarm Config::get_alarm_settings(int i)
   if(i < 0 || i >= NUM_ALARM)
   {
     Alarm invalid;
-    invalid.time_int(-1);
+    invalid.secs_in_day = -1;
     return invalid;
   }
 
@@ -144,7 +176,7 @@ void Config::store_alarm_settings(const Alarm &alarm_ref, int i)
 
   String time_key(alarm_time_prefix);
   time_key += i;
-  settings.putInt(time_key.c_str(), alarm[i].time_int());
+  settings.putInt(time_key.c_str(), alarm[i].secs_in_day);
 
   String sound_key(alarm_sound_prefix);
   sound_key += i;

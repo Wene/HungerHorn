@@ -6,12 +6,14 @@
 
 struct Alarm
 {
-  int hour;
-  int min;
-  int sec;
+  int32_t secs_in_day;
   uint8_t sound;
-  int32_t time_int();
-  void time_int(int32_t seconds);
+  int hour();
+  int min();
+  int sec();
+  void hour(int new_val);
+  void min(int new_val);
+  void sec(int new_val);
 };
 
 class Config

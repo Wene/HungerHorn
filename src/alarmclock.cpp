@@ -20,13 +20,20 @@ void AlarmClock::tick()
   {
     last_update = now;
 
-    Alarm alarm = config.get_alarm_settings(0);
-    time_t clock = time(NULL);
-    struct tm *timeinfo = localtime(&clock);
-    if(alarm.hour == timeinfo->tm_hour && alarm.min == timeinfo->tm_min && alarm.sec == timeinfo->tm_sec)
+    for(int i = 0; i < NUM_ALARM; i++)
     {
-      player.play_track(1);
-      last_update += 2000;
+      Alarm alarm = config.get_alarm_settings(i);
+      if(alarm.secs_in_day < 0) continue;
+
+      time_t clock = time(NULL);
+      struct tm *timeinfo = localtime(&clock);
+      int32_t now_secs = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
+
+      if(now_secs == alarm.secs_in_day && alarm.sound)
+      {
+        player.play_track(alarm.sound);
+        last_update += 10000;
+      }
     }
   }
 }
@@ -96,7 +103,7 @@ void AlarmClock::alarm_setup_start()
 {
   Alarm alarm = config.get_alarm_settings(0);
   char cur_alarm[10];
-  snprintf(cur_alarm, sizeof(cur_alarm), "%02d:%02d:%02d", alarm.hour, alarm.min, alarm.sec);
+  snprintf(cur_alarm, sizeof(cur_alarm), "%02d:%02d:%02d", alarm.hour(), alarm.min(), alarm.sec());
   Serial.print(F("The alarm is currently set to "));
   Serial.println(cur_alarm);
   Serial.print(F("Enter the new alarm time: "));
@@ -127,9 +134,9 @@ void AlarmClock::alarm_setup(const String &input)
   }
 
   Alarm alarm;
-  alarm.hour = hour_str.toInt();
-  alarm.min = min_str.toInt();
-  alarm.sec = sec_str.toInt();
+  alarm.hour(hour_str.toInt());
+  alarm.min(min_str.toInt());
+  alarm.sec(sec_str.toInt());
 
   config.store_alarm_settings(alarm, 0);
 }
