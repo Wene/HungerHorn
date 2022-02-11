@@ -20,7 +20,7 @@ void AlarmClock::tick()
   {
     last_update = now;
 
-    TimeConfig alarm = config.get_alarm_settings();
+    Alarm alarm = config.get_alarm_settings(0);
     time_t clock = time(NULL);
     struct tm *timeinfo = localtime(&clock);
     if(alarm.hour == timeinfo->tm_hour && alarm.min == timeinfo->tm_min && alarm.sec == timeinfo->tm_sec)
@@ -94,7 +94,7 @@ void AlarmClock::config_dst(const String &input)
 
 void AlarmClock::alarm_setup_start()
 {
-  TimeConfig alarm = config.get_alarm_settings();
+  Alarm alarm = config.get_alarm_settings(0);
   char cur_alarm[10];
   snprintf(cur_alarm, sizeof(cur_alarm), "%02d:%02d:%02d", alarm.hour, alarm.min, alarm.sec);
   Serial.print(F("The alarm is currently set to "));
@@ -126,12 +126,12 @@ void AlarmClock::alarm_setup(const String &input)
     sec_str = rest.substring(pos+1);
   }
 
-  TimeConfig alarm;
+  Alarm alarm;
   alarm.hour = hour_str.toInt();
   alarm.min = min_str.toInt();
   alarm.sec = sec_str.toInt();
 
-  config.store_alarm_settings(alarm);
+  config.store_alarm_settings(alarm, 0);
 }
 
 void AlarmClock::print_time()

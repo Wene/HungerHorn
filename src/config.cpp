@@ -9,9 +9,24 @@ static const char *ssid_name = "ssid";
 static const char *ntp_name = "ntp";
 static const char *utc_offs_name = "utc_offset";
 static const char *dst_name = "dst_offset";
-static const char *alarm_hour_name = "alarm_hour";
-static const char *alarm_min_name = "alarm_min";
-static const char *alarm_sec_name = "alarm_sec";
+static const char *alarm_time_prefix = "alarm_time_";
+static const char *alarm_sound_prefix = "alarm_sound_";
+
+void Alarm::time_int(int32_t seconds)
+{
+  hour = seconds / 3600;
+  seconds %= 3600;
+  min = seconds / 60;
+  sec = seconds % 60;
+}
+
+int32_t Alarm::time_int()
+{
+  int32_t seconds = sec;
+  seconds += min * 60;
+  seconds += hour * 3600;
+  return seconds;
+}
 
 Config::Config(): ssid("unset"), psk("---"), ntp_server("pool.ntp.org"), utc_offset_secs(0), dst_offset_secs(0)
 {
@@ -46,17 +61,20 @@ void Config::setup()
     dst_offset_secs = settings.getInt(dst_name);
   }
 
-  if(settings.isKey(alarm_hour_name))
+  for(int i = 0; i < NUM_ALARM; i++)
   {
-    alarm_time.hour = settings.getInt(alarm_hour_name);
-  }
-  if(settings.isKey(alarm_min_name))
-  {
-    alarm_time.min = settings.getInt(alarm_min_name);
-  }
-  if(settings.isKey(alarm_sec_name))
-  {
-    alarm_time.sec = settings.getInt(alarm_sec_name);
+    String time_key(alarm_time_prefix);
+    time_key += i;
+    if(settings.isKey(time_key.c_str()))
+    {
+      alarm[i].time_int(settings.getInt(time_key.c_str()));
+    }
+    String sound_key(alarm_sound_prefix);
+    sound_key += i;
+    if(settings.isKey(sound_key.c_str()))
+    {
+      alarm[i].sound = settings.getUChar(sound_key.c_str());
+    }
   }
 }
 
@@ -75,9 +93,16 @@ const String &Config::get_ntp_server()
   return ntp_server;
 }
 
-TimeConfig Config::get_alarm_settings()
+Alarm Config::get_alarm_settings(int i)
 {
-  return alarm_time;
+  if(i < 0 || i >= NUM_ALARM)
+  {
+    Alarm invalid;
+    invalid.time_int(-1);
+    return invalid;
+  }
+
+  return alarm[i];
 }
 
 long Config::get_utc_offset_secs()
@@ -108,12 +133,22 @@ void Config::store_clock_settings(const String &ntp_server_address, long utc_off
   settings.putInt(dst_name, dst_offset_secs);
 }
 
-void Config::store_alarm_settings(const TimeConfig &alarm)
+void Config::store_alarm_settings(const Alarm &alarm_ref, int i)
 {
-  alarm_time = alarm;
-  settings.putInt(alarm_hour_name, alarm_time.hour);
-  settings.putInt(alarm_min_name, alarm_time.min);
-  settings.putInt(alarm_sec_name, alarm_time.sec);
+  if(i < 0 || i >= NUM_ALARM)
+  {
+    return;
+  }
+
+  alarm[i] = alarm_ref;
+
+  String time_key(alarm_time_prefix);
+  time_key += i;
+  settings.putInt(time_key.c_str(), alarm[i].time_int());
+
+  String sound_key(alarm_sound_prefix);
+  sound_key += i;
+  settings.putUChar(sound_key.c_str(), alarm[i].sound);
 }
 
 Config config;
