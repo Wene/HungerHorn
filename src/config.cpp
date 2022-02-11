@@ -31,6 +31,11 @@ int Alarm::sec()
 
 void Alarm::hour(int new_val)
 {
+  if(secs_in_day < 0)
+  {
+    secs_in_day = 0;
+  }
+
   int hour = new_val;
   int rest = secs_in_day % 3600;
   int min = rest / 60;
@@ -39,8 +44,14 @@ void Alarm::hour(int new_val)
   secs_in_day = hour * 3600 + min * 60 + sec;
 }
 
+
 void Alarm::min(int new_val)
 {
+  if(secs_in_day < 0)
+  {
+    secs_in_day = 0;
+  }
+
   int hour = secs_in_day / 3600;
   int rest = secs_in_day % 3600;
   int min = new_val;
@@ -51,6 +62,11 @@ void Alarm::min(int new_val)
 
 void Alarm::sec(int new_val)
 {
+  if(secs_in_day < 0)
+  {
+    secs_in_day = 0;
+  }
+
   int hour = secs_in_day / 3600;
   int rest = secs_in_day % 3600;
   int min = rest / 60;

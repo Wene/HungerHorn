@@ -1,7 +1,6 @@
 #include "alarmclock.h"
 #include <functional>
 #include <time.h>
-#include "config.h"
 #include "terminal.h"
 #include "player.h"
 
@@ -101,44 +100,113 @@ void AlarmClock::config_dst(const String &input)
 
 void AlarmClock::alarm_setup_start()
 {
-  Alarm alarm = config.get_alarm_settings(0);
-  char cur_alarm[10];
-  snprintf(cur_alarm, sizeof(cur_alarm), "%02d:%02d:%02d", alarm.hour(), alarm.min(), alarm.sec());
-  Serial.print(F("The alarm is currently set to "));
-  Serial.println(cur_alarm);
-  Serial.print(F("Enter the new alarm time: "));
-  terminal.input(std::bind(&AlarmClock::alarm_setup, this, std::placeholders::_1));
+  Serial.println();
+  Serial.println(F("No | Active | Sound | Time"));
+
+  for(int i = 0; i < NUM_ALARM; i++)
+  {
+    Alarm alarm = config.get_alarm_settings(i);
+    String line(i);
+    line += "  : ";
+
+    bool active = alarm.secs_in_day >= 0;
+    line += active ? "yes    : " : "no     : ";
+    if(!active)
+    {
+      alarm.secs_in_day = 0;
+    }
+
+    char c_str[10];
+    snprintf(c_str, sizeof(c_str), "%-6d: ", alarm.sound);
+    line += c_str;
+
+    snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm.hour(), alarm.min(), alarm.sec());
+    line += c_str;
+    Serial.println(line);
+  }
+
+  Serial.print(F("Enter a number to edit, hit enter to abort: "));
+  terminal.input(std::bind(&AlarmClock::alarm_setup_no, this, std::placeholders::_1));
 }
 
-void AlarmClock::alarm_setup(const String &input)
+void AlarmClock::alarm_setup_no(const String &input)
 {
   if(input.isEmpty())
   {
     return;
   }
 
-  int pos = input.indexOf(':');
-  if(0 >= pos) return;
-  String hour_str = input.substring(0, pos);
-  String rest = input.substring(pos+1);
-  pos = rest.indexOf(':');
-  String min_str, sec_str;
-  if(0 >= pos)
+  setup_index = input.toInt();
+  if(setup_index >= 0 && setup_index < NUM_ALARM)
   {
-    min_str = rest;
+    setup_alarm = config.get_alarm_settings(setup_index);
+    Serial.print(F("Enter 1 to enable, 0 to disable: "));
+    terminal.input(std::bind(&AlarmClock::alarm_setup_act, this, std::placeholders::_1));
+  }
+}
+
+void AlarmClock::alarm_setup_act(const String &input)
+{
+  if(input.isEmpty())
+  {
+    return;
+  }
+
+  int enable = input.toInt();
+  if(enable)
+  {
+    Serial.print(F("Enter the sound number: "));
+    terminal.input(std::bind(&AlarmClock::alarm_setup_snd, this, std::placeholders::_1));
   }
   else
   {
-    min_str = rest.substring(0, pos);
-    sec_str = rest.substring(pos+1);
+    setup_alarm.secs_in_day = -1;
+    config.store_alarm_settings(setup_alarm, setup_index);
+  }
+}
+
+void AlarmClock::alarm_setup_snd(const String &input)
+{
+  if(input.isEmpty())
+  {
+    return;
   }
 
-  Alarm alarm;
-  alarm.hour(hour_str.toInt());
-  alarm.min(min_str.toInt());
-  alarm.sec(sec_str.toInt());
+  setup_alarm.sound = input.toInt();
+  Serial.print(F("Enter the alarm time: "));
+  terminal.input(std::bind(&AlarmClock::alarm_setup_time, this, std::placeholders::_1));
+}
 
-  config.store_alarm_settings(alarm, 0);
+void AlarmClock::alarm_setup_time(const String &input)
+{
+  if(!input.isEmpty())
+  {
+    int pos = input.indexOf(':');
+    if(0 >= pos)
+    {
+      Serial.println(F("invalid format - abort"));
+      return;
+    }
+    String hour_str = input.substring(0, pos);
+    String rest = input.substring(pos+1);
+    pos = rest.indexOf(':');
+    String min_str, sec_str;
+    if(0 >= pos)
+    {
+      min_str = rest;
+    }
+    else
+    {
+      min_str = rest.substring(0, pos);
+      sec_str = rest.substring(pos+1);
+    }
+
+    setup_alarm.hour(hour_str.toInt());
+    setup_alarm.min(min_str.toInt());
+    setup_alarm.sec(sec_str.toInt());
+  }
+
+  config.store_alarm_settings(setup_alarm, setup_index);
 }
 
 void AlarmClock::print_time()
