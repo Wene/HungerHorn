@@ -3,6 +3,7 @@
 #include <time.h>
 #include "terminal.h"
 #include "player.h"
+#include "lightshow.h"
 
 void AlarmClock::setup()
 {
@@ -30,6 +31,7 @@ void AlarmClock::tick(unsigned long now)
       if(now_secs == alarm.secs_in_day && alarm.sound)
       {
         player.play_track(alarm.sound);
+        lightshow.event();
         last_update += 10000;
       }
     }

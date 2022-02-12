@@ -7,6 +7,7 @@ class Lightshow
 public:
   void setup();
   void tick(unsigned long now);
+  void event();
 
 private:
   unsigned long last_show;

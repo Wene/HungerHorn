@@ -24,7 +24,7 @@ void Lightshow::tick(unsigned long now)
     time_t timestamp = time(NULL);
     struct tm *time_struct = localtime(&timestamp);
 
-    if(++duration > 250)
+    if(++duration > 500)
     {
       duration = 0;
       if(++step > 2)
@@ -52,20 +52,40 @@ void Lightshow::tick(unsigned long now)
         break;
     }
 
-    for(int i = 0; i < NUM_LEDS; i++)
+    if(event_countdown)
     {
-      if(display_value & 1 << i)
+      event_countdown--;
+      uint8_t color = (event_countdown / 10) % NUM_LEDS;
+      uint8_t step = 255 / NUM_LEDS;
+      color *= step;
+      for(int i = 0; i < NUM_LEDS; i++)
       {
-        leds[i].setHSV(display_color, 255, 255);
+        leds[i].setHSV(color, 255, 255);
+        color += step;
       }
-      else
+    }
+    else
+    {
+      for(int i = 0; i < NUM_LEDS; i++)
       {
-        leds[i].fadeToBlackBy(10);
+        if(display_value & 1 << i)
+        {
+          leds[i].setHSV(display_color, 255, 255);
+        }
+        else
+        {
+          leds[i].fadeToBlackBy(10);
+        }
       }
     }
 
     FastLED.show();
   }
+}
+
+void Lightshow::event()
+{
+  event_countdown = 200;
 }
 
 Lightshow lightshow;
