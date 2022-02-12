@@ -67,3 +67,5 @@ void Lightshow::tick(unsigned long now)
     FastLED.show();
   }
 }
+
+Lightshow lightshow;

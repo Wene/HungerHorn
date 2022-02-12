@@ -8,8 +8,6 @@
 #include "alarmclock.h"
 #include "lightshow.h"
 
-static Lightshow ls;
-
 static void menu_display();
 
 static void menu_selection(const String &input)
@@ -55,7 +53,7 @@ void setup()
 {
   terminal.setup(menu_display);
   config.setup();
-  ls.setup();
+  lightshow.setup();
   network.setup();
   alarmclock.setup();
   player.setup();
@@ -69,5 +67,5 @@ void loop()
   unsigned long now = millis();
   terminal.tick(now);
   alarmclock.tick(now);
-  ls.tick(now);
+  lightshow.tick(now);
 }
