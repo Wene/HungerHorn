@@ -129,6 +129,7 @@ CONFIG += c++11
 SOURCES += \
     src/alarmclock.cpp \
     src/config.cpp \
+    src/lightshow.cpp \
     src/main.cpp \
     src/network.cpp \
     src/player.cpp \
@@ -137,6 +138,7 @@ SOURCES += \
 HEADERS += \
     src/alarmclock.h \
     src/config.h \
+    src/lightshow.h \
     src/network.h \
     src/player.h \
     src/terminal.h

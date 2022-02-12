@@ -7,7 +7,7 @@ class AlarmClock
 {
 public:
   void setup();
-  void tick();
+  void tick(unsigned long now);
   void config_start();
   void alarm_setup_start();
   void print_time();

@@ -12,9 +12,8 @@ void AlarmClock::setup()
   configTime(utc_offset, dst_offset, ntp_server.c_str());
 }
 
-void AlarmClock::tick()
+void AlarmClock::tick(unsigned long now)
 {
-  unsigned long now = millis();
   if(now >= last_update + 1000)
   {
     last_update = now;

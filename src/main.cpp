@@ -6,6 +6,9 @@
 #include "terminal.h"
 #include "network.h"
 #include "alarmclock.h"
+#include "lightshow.h"
+
+static Lightshow ls;
 
 static void menu_display();
 
@@ -52,6 +55,7 @@ void setup()
 {
   terminal.setup(menu_display);
   config.setup();
+  ls.setup();
   network.setup();
   alarmclock.setup();
   player.setup();
@@ -62,6 +66,8 @@ void setup()
 
 void loop()
 {
-  terminal.tick();
-  alarmclock.tick();
+  unsigned long now = millis();
+  terminal.tick(now);
+  alarmclock.tick(now);
+  ls.tick(now);
 }

@@ -7,7 +7,7 @@ class Terminal
 {
 public:
   void setup(std::function<void(void)> callback);
-  void tick();
+  void tick(unsigned long now);
   void input(std::function<void(const String&)> callback);
 
 private:

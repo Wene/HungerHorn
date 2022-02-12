@@ -13,10 +13,8 @@ void Terminal::setup(std::function<void(void)> callback)
   active = false;
 }
 
-void Terminal::tick()
+void Terminal::tick(unsigned long now)
 {
-  unsigned long now = millis();
-
   if(active && Serial.available())
   {
     last_interaction = now;
