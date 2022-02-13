@@ -68,4 +68,5 @@ void loop()
   terminal.tick(now);
   alarmclock.tick(now);
   lightshow.tick(now);
+  network.tick(now);
 }

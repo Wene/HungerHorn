@@ -10,7 +10,6 @@
 void Network::setup()
 {
   WiFi.mode(WIFI_MODE_STA);
-  WiFi.disconnect();
 
   num_net = WiFi.scanNetworks();
   for(int i = 0; i < num_net; i++)
@@ -31,38 +30,45 @@ void Network::setup()
   Serial.println(F("No known WLAN found"));
 }
 
+void Network::tick(unsigned long now)
+{
+  if(connecting_countdown)
+  {
+    if(now > last_tick + 500)
+    {
+      last_tick = now;
+      connecting_countdown--;
+
+      if(WL_CONNECTED == WiFi.status())
+      {
+        Serial.println(F("WLAN connected"));
+        connecting_countdown = 0;
+        // TODO: callback for network depending things
+      }
+      else if(0 == connecting_countdown)
+      {
+        Serial.println(F("WLAN connection failed"));
+        WiFi.disconnect();
+      }
+    }
+  }
+}
+
 void Network::connect()
 {
   Serial.print(F("Connecting to WLAN \""));
   Serial.print(ssid);
   Serial.print(F("\" using key \""));
   Serial.print(psk);
-  Serial.print("\"");
+  Serial.println("\"...");
 
-  WiFi.begin(ssid.c_str(), psk.c_str());
-
-  // this part is blocking: // TODO: unblock
-  bool connected = false;
-  for(int i = 0; i < 30; i++)
+  if(WiFi.isConnected())
   {
-    if(WL_CONNECTED == WiFi.status())
-    {
-      connected = true;
-      break;
-    }
-    Serial.print(".");
-    delay(500);
-  }
-
-  if(connected)
-  {
-    Serial.println(F("success"));
-  }
-  else
-  {
-    Serial.println(F("failed"));
     WiFi.disconnect();
   }
+
+  WiFi.begin(ssid.c_str(), psk.c_str());
+  connecting_countdown = 50;
 }
 
 void Network::config_start()
