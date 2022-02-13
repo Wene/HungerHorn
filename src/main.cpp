@@ -14,7 +14,7 @@ static void menu_selection(const String &input)
 {
   if(input == "w")
   {
-    network.scan();
+    network.config_start();
   }
   else if(input == "c")
   {

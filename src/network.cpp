@@ -12,10 +12,23 @@ void Network::setup()
   WiFi.mode(WIFI_MODE_STA);
   WiFi.disconnect();
 
-  ssid = config.get_wifi_ssid(0);
-  psk = config.get_wifi_psk(0);
+  num_net = WiFi.scanNetworks();
+  for(int i = 0; i < num_net; i++)
+  {
+    String name(WiFi.SSID(i));
+    for(int j = 0; j < NUM_WIFI; j++)
+    {
+      if(name == config.get_wifi_ssid(j))
+      {
+        ssid = name;
+        psk = config.get_wifi_psk(j);
+        connect();
+        return;
+      }
+    }
+  }
 
-  connect();
+  Serial.println(F("No known WLAN found"));
 }
 
 void Network::connect()
@@ -52,8 +65,36 @@ void Network::connect()
   }
 }
 
-void Network::scan()
+void Network::config_start()
 {
+  Serial.println();
+  Serial.println(F("No | Name"));
+  for(int i = 0; i < NUM_WIFI; i++)
+  {
+    String line(i);
+    line += "  : \"";
+    line += config.get_wifi_ssid(i);
+    line += "\"";
+    Serial.println(line);
+  }
+  Serial.print(F("Select the slot to edit: "));
+  terminal.input(std::bind(&Network::scan, this, std::placeholders::_1));
+}
+
+void Network::scan(const String &input)
+{
+  if(input.isEmpty())
+  {
+    return;
+  }
+
+  slot = input.toInt();
+  if(0 > slot || NUM_WIFI <= slot)
+  {
+    Serial.println(F("Not a valid slot number"));
+    return;
+  }
+
   Serial.println(F("Scanning for WiFi networks..."));
   num_net = WiFi.scanNetworks();
   Serial.print(F("Scan complete. Found "));
@@ -94,7 +135,7 @@ void Network::select(const String &input)
 void Network::password(const String &input)
 {
   psk = input;
-  config.store_wifi_settings(ssid, psk, 0);
+  config.store_wifi_settings(ssid, psk, slot);
   connect();
 }
 

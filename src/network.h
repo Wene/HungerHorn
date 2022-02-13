@@ -6,13 +6,15 @@ class Network
 {
 public:
   void setup();
-  void scan();
+  void config_start();
 
 private:
+  void scan(const String &input);
   void select(const String &input);
   void password(const String &input);
   void connect();
   int num_net;
+  int slot;
   String ssid;
   String psk;
 };
