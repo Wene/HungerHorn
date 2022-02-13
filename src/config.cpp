@@ -4,8 +4,8 @@
 static Preferences settings;
 
 static const char *settings_name = "settings";
-static const char *psk_name = "psk";
-static const char *ssid_name = "ssid";
+static const char *ssid_prefix = "ssid_";
+static const char *psk_prefix = "psk_";
 static const char *ntp_name = "ntp";
 static const char *utc_offs_name = "utc_offset";
 static const char *dst_name = "dst_offset";
@@ -76,7 +76,7 @@ void Alarm::sec(int new_val)
 }
 
 
-Config::Config(): ssid("unset"), psk("---"), ntp_server("pool.ntp.org"), utc_offset_secs(0), dst_offset_secs(0)
+Config::Config(): ntp_server("pool.ntp.org"), utc_offset_secs(0), dst_offset_secs(0)
 {
 }
 
@@ -84,14 +84,21 @@ void Config::setup()
 {
   settings.begin(settings_name);
 
-  if(settings.isKey(ssid_name))
+  for(int i = 0; i < NUM_WIFI; i++)
   {
-    ssid = settings.getString(ssid_name);
-  }
+    String ssid_key(ssid_prefix);
+    ssid_key += i;
+    String psk_key(psk_prefix);
+    psk_key += i;
 
-  if(settings.isKey(psk_name))
-  {
-    psk = settings.getString(psk_name);
+    if(settings.isKey(ssid_key.c_str()))
+    {
+      ssid[i] = settings.getString(ssid_key.c_str());
+    }
+    if(settings.isKey(psk_key.c_str()))
+    {
+      psk[i] = settings.getString(psk_key.c_str());
+    }
   }
 
   if(settings.isKey(ntp_name))
@@ -126,14 +133,24 @@ void Config::setup()
   }
 }
 
-const String &Config::get_wifi_ssid()
+static String invalid_str("invalid");
+
+const String &Config::get_wifi_ssid(int i)
 {
-  return ssid;
+  if(0 > i || NUM_WIFI <= i)
+  {
+    return invalid_str;
+  }
+  return ssid[i];
 }
 
-const String &Config::get_wifi_psk()
+const String &Config::get_wifi_psk(int i)
 {
-  return psk;
+  if(i < 0 || NUM_WIFI <= i)
+  {
+    return invalid_str;
+  }
+  return psk[i];
 }
 
 const String &Config::get_ntp_server()
@@ -143,7 +160,7 @@ const String &Config::get_ntp_server()
 
 Alarm Config::get_alarm_settings(int i)
 {
-  if(i < 0 || i >= NUM_ALARM)
+  if(0 > i || NUM_ALARM <= i)
   {
     Alarm invalid;
     invalid.secs_in_day = -1;
@@ -163,12 +180,23 @@ int Config::get_dst_offset_secs()
   return dst_offset_secs;
 }
 
-void Config::store_wifi_settings(const String &name, const String &key)
+void Config::store_wifi_settings(const String &name, const String &key, int i)
 {
-  ssid = name;
-  psk = key;
-  settings.putString(ssid_name, ssid);
-  settings.putString(psk_name, psk);
+  if(0 > i || NUM_WIFI <= i)
+  {
+    return;
+  }
+
+  ssid[i] = name;
+  psk[i] = key;
+
+  String ssid_key(ssid_prefix);
+  ssid_key += i;
+  String psk_key(psk_prefix);
+  psk_key += i;
+
+  settings.putString(ssid_key.c_str(), ssid[i]);
+  settings.putString(psk_key.c_str(), psk[i]);
 }
 
 void Config::store_clock_settings(const String &ntp_server_address, long utc_offset, int dst_offset)
@@ -183,7 +211,7 @@ void Config::store_clock_settings(const String &ntp_server_address, long utc_off
 
 void Config::store_alarm_settings(const Alarm &alarm_ref, int i)
 {
-  if(i < 0 || i >= NUM_ALARM)
+  if(0 > i || NUM_ALARM <= i)
   {
     return;
   }

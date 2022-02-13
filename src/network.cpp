@@ -12,8 +12,8 @@ void Network::setup()
   WiFi.mode(WIFI_MODE_STA);
   WiFi.disconnect();
 
-  ssid = config.get_wifi_ssid();
-  psk = config.get_wifi_psk();
+  ssid = config.get_wifi_ssid(0);
+  psk = config.get_wifi_psk(0);
 
   connect();
 }
@@ -94,7 +94,7 @@ void Network::select(const String &input)
 void Network::password(const String &input)
 {
   psk = input;
-  config.store_wifi_settings(ssid, psk);
+  config.store_wifi_settings(ssid, psk, 0);
   connect();
 }
 
