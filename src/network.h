@@ -13,6 +13,7 @@ private:
   void scan(const String &input);
   void select(const String &input);
   void password(const String &input);
+  void search();
   void connect();
   int num_net;
   int slot;

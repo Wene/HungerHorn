@@ -11,6 +11,11 @@ void Network::setup()
 {
   WiFi.mode(WIFI_MODE_STA);
 
+  search();
+}
+
+void Network::search()
+{
   num_net = WiFi.scanNetworks();
   for(int i = 0; i < num_net; i++)
   {
@@ -49,6 +54,17 @@ void Network::tick(unsigned long now)
       {
         Serial.println(F("WLAN connection failed"));
         WiFi.disconnect();
+      }
+    }
+  }
+  else
+  {
+    if(now > last_tick + 30000)
+    {
+      last_tick = now;
+      if(WL_CONNECTED != WiFi.status())
+      {
+        search();
       }
     }
   }
