@@ -69,4 +69,5 @@ void loop()
   alarmclock.tick(now);
   lightshow.tick(now);
   network.tick(now);
+  delay(1);
 }

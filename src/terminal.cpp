@@ -44,8 +44,11 @@ void Terminal::tick(unsigned long now)
     }
     else
     {
-      buffer += String((char)in_char);
-      Serial.write(in_char);
+      if(!isControl(in_char))
+      {
+        buffer += String((char)in_char);
+        Serial.write(in_char);
+      }
     }
   }
   else if(now > last_interaction + 30000)
