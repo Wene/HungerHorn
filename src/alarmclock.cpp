@@ -1,15 +1,125 @@
 #include "alarmclock.h"
+
 #include <functional>
 #include <time.h>
+#include <Preferences.h>
+
 #include "terminal.h"
 #include "player.h"
 #include "lightshow.h"
 
+static const char *alarm_time_prefix = "time_";
+static const char *alarm_sound_prefix = "sound_";
+static const char *ntp_name = "ntp";
+static const char *utc_offs_name = "utc_offset";
+static const char *dst_name = "dst_offset";
+
+int Alarm::hour()
+{
+  return secs_in_day / 3600;
+}
+
+int Alarm::min()
+{
+  int min_sec = secs_in_day % 3600;
+  return min_sec / 60;
+}
+
+int Alarm::sec()
+{
+  int min_sec = secs_in_day % 3600;
+  return min_sec % 60;
+}
+
+void Alarm::hour(int new_val)
+{
+  if(secs_in_day < 0)
+  {
+    secs_in_day = 0;
+  }
+
+  int hour = new_val;
+  int rest = secs_in_day % 3600;
+  int min = rest / 60;
+  int sec = rest % 60;
+
+  secs_in_day = hour * 3600 + min * 60 + sec;
+}
+
+
+void Alarm::min(int new_val)
+{
+  if(secs_in_day < 0)
+  {
+    secs_in_day = 0;
+  }
+
+  int hour = secs_in_day / 3600;
+  int rest = secs_in_day % 3600;
+  int min = new_val;
+  int sec = rest % 60;
+
+  secs_in_day = hour * 3600 + min * 60 + sec;
+}
+
+void Alarm::sec(int new_val)
+{
+  if(secs_in_day < 0)
+  {
+    secs_in_day = 0;
+  }
+
+  int hour = secs_in_day / 3600;
+  int rest = secs_in_day % 3600;
+  int min = rest / 60;
+  int sec = new_val;
+
+  secs_in_day = hour * 3600 + min * 60 + sec;
+}
+
+AlarmClock::AlarmClock(): ntp_server("pool.ntp.org"), settings(new Preferences())
+{
+
+}
+
+AlarmClock::~AlarmClock()
+{
+  settings->end();
+  delete settings;
+}
+
 void AlarmClock::setup()
 {
-  ntp_server = config.get_ntp_server();
-  utc_offset = config.get_utc_offset_secs();
-  dst_offset = config.get_dst_offset_secs();
+  settings->begin("alarm");
+
+  for(int i = 0; i < NUM_ALARM; i++)
+  {
+    String time_key(alarm_time_prefix);
+    time_key += i;
+    if(settings->isKey(time_key.c_str()))
+    {
+      alarm[i].secs_in_day = settings->getInt(time_key.c_str());
+    }
+    String sound_key(alarm_sound_prefix);
+    sound_key += i;
+    if(settings->isKey(sound_key.c_str()))
+    {
+      alarm[i].sound = settings->getUChar(sound_key.c_str());
+    }
+  }
+
+  if(settings->isKey(ntp_name))
+  {
+    ntp_server = settings->getString(ntp_name);
+  }
+  if(settings->isKey(utc_offs_name))
+  {
+    utc_offset = settings->getLong(utc_offs_name);
+  }
+  if(settings->isKey(dst_name))
+  {
+    dst_offset = settings->getInt(dst_name);
+  }
   configTime(utc_offset, dst_offset, ntp_server.c_str());
 }
 
@@ -21,16 +131,15 @@ void AlarmClock::tick(unsigned long now)
 
     for(int i = 0; i < NUM_ALARM; i++)
     {
-      Alarm alarm = config.get_alarm_settings(i);
-      if(alarm.secs_in_day < 0) continue;
+      if(alarm[i].secs_in_day < 0) continue;
 
       time_t clock = time(NULL);
       struct tm *timeinfo = localtime(&clock);
       int32_t now_secs = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
 
-      if(now_secs == alarm.secs_in_day && alarm.sound)
+      if(now_secs == alarm[i].secs_in_day && alarm[i].sound)
       {
-        player.play_track(alarm.sound);
+        player.play_track(alarm[i].sound);
         lightshow.event();
         last_update += 10000;
       }
@@ -41,7 +150,7 @@ void AlarmClock::tick(unsigned long now)
 void AlarmClock::config_start()
 {
   Serial.print(F("The current NTP server address is \""));
-  Serial.print(config.get_ntp_server());
+  Serial.print(ntp_server);
   Serial.println("\"");
   Serial.print(F("Enter the new address or just hit enter to keep it: "));
   terminal.input(std::bind(&AlarmClock::config_ntp, this, std::placeholders::_1));
@@ -95,7 +204,10 @@ void AlarmClock::config_dst(const String &input)
     }
   }
 
-  config.store_clock_settings(ntp_server, utc_offset, dst_offset);
+  settings->putString(ntp_name, ntp_server);
+  settings->putLong(utc_offs_name, utc_offset);
+  settings->putInt(dst_name, dst_offset);
+
   configTime(utc_offset, dst_offset, ntp_server.c_str());
 }
 
@@ -106,22 +218,21 @@ void AlarmClock::alarm_setup_start()
 
   for(int i = 0; i < NUM_ALARM; i++)
   {
-    Alarm alarm = config.get_alarm_settings(i);
     String line(i);
     line += "  : ";
 
-    bool active = alarm.secs_in_day >= 0;
+    bool active = alarm[i].secs_in_day >= 0;
     line += active ? "yes    : " : "no     : ";
     if(!active)
     {
-      alarm.secs_in_day = 0;
+      alarm[i].secs_in_day = 0;
     }
 
     char c_str[10];
-    snprintf(c_str, sizeof(c_str), "%-6d: ", alarm.sound);
+    snprintf(c_str, sizeof(c_str), "%-6d: ", alarm[i].sound);
     line += c_str;
 
-    snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm.hour(), alarm.min(), alarm.sec());
+    snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm[i].hour(), alarm[i].min(), alarm[i].sec());
     line += c_str;
     Serial.println(line);
   }
@@ -140,9 +251,13 @@ void AlarmClock::alarm_setup_no(const String &input)
   setup_index = input.toInt();
   if(setup_index >= 0 && setup_index < NUM_ALARM)
   {
-    setup_alarm = config.get_alarm_settings(setup_index);
     Serial.print(F("Enter 1 to enable, 0 to disable: "));
     terminal.input(std::bind(&AlarmClock::alarm_setup_act, this, std::placeholders::_1));
+    setup_alarm = alarm[setup_index];
+  }
+  else
+  {
+    Serial.println(F("selection out of range"));
   }
 }
 
@@ -162,7 +277,7 @@ void AlarmClock::alarm_setup_act(const String &input)
   else
   {
     setup_alarm.secs_in_day = -1;
-    config.store_alarm_settings(setup_alarm, setup_index);
+    store_setup_alarm();
   }
 }
 
@@ -207,7 +322,7 @@ void AlarmClock::alarm_setup_time(const String &input)
     setup_alarm.sec(sec_str.toInt());
   }
 
-  config.store_alarm_settings(setup_alarm, setup_index);
+  store_setup_alarm();
 }
 
 void AlarmClock::print_time()
@@ -216,6 +331,19 @@ void AlarmClock::print_time()
   struct tm *timeinfo = localtime(&timestamp);
 
   Serial.println(timeinfo, "%Y-%m-%d %H:%M:%S");
+}
+
+void AlarmClock::store_setup_alarm()
+{
+  alarm[setup_index] = setup_alarm;
+
+  String time_key(alarm_time_prefix);
+  time_key += setup_index;
+  settings->putInt(time_key.c_str(), alarm[setup_index].secs_in_day);
+  String sound_key(alarm_sound_prefix);
+  sound_key += setup_index;
+  settings->putUChar(sound_key.c_str(), alarm[setup_index].sound);
+
 }
 
 AlarmClock alarmclock;

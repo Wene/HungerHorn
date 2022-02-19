@@ -2,7 +2,6 @@
 #include <WiFi.h>
 
 #include "player.h"
-#include "config.h"
 #include "terminal.h"
 #include "network.h"
 #include "alarmclock.h"
@@ -52,7 +51,6 @@ static void menu_display()
 void setup()
 {
   terminal.setup(menu_display);
-  config.setup();
   lightshow.setup();
   network.setup();
   alarmclock.setup();
