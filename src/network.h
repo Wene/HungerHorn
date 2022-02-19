@@ -24,6 +24,7 @@ private:
   void connect();
   int num_net;
   int slot;
+  bool setup_active;
   String active_ssid;
   String active_psk;
   unsigned long last_tick;

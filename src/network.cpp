@@ -88,7 +88,7 @@ void Network::tick(unsigned long now)
       }
     }
   }
-  else
+  else if(!setup_active)
   {
     if(now > last_tick + 30000)
     {
@@ -132,6 +132,7 @@ void Network::config_start()
   }
   Serial.print(F("Select the slot to edit: "));
   terminal.input(std::bind(&Network::scan, this, std::placeholders::_1));
+  setup_active = true;
 }
 
 void Network::scan(const String &input)
@@ -145,6 +146,7 @@ void Network::scan(const String &input)
   if(0 > slot || NUM_WIFI <= slot)
   {
     Serial.println(F("Not a valid slot number"));
+    setup_active = false;
     return;
   }
 
@@ -166,6 +168,7 @@ void Network::select(const String &input)
 {
   if(input.isEmpty())
   {
+    setup_active = false;
     return;
   }
 
@@ -197,6 +200,7 @@ void Network::password(const String &input)
   settings->putString(psk_key.c_str(), active_psk);
 
   connect();
+  setup_active = false;
 }
 
 Network network;
