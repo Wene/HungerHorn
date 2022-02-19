@@ -8,6 +8,7 @@ class Preferences;
 
 struct Alarm
 {
+  Alarm(): secs_in_day(-1) {};
   int32_t secs_in_day;
   uint8_t sound;
   int hour();

@@ -223,17 +223,20 @@ void AlarmClock::alarm_setup_start()
 
     bool active = alarm[i].secs_in_day >= 0;
     line += active ? "yes    : " : "no     : ";
-    if(!active)
-    {
-      alarm[i].secs_in_day = 0;
-    }
 
     char c_str[10];
     snprintf(c_str, sizeof(c_str), "%-6d: ", alarm[i].sound);
     line += c_str;
 
-    snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm[i].hour(), alarm[i].min(), alarm[i].sec());
-    line += c_str;
+    if(active)
+    {
+      snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm[i].hour(), alarm[i].min(), alarm[i].sec());
+      line += c_str;
+    }
+    else
+    {
+      line += "---";
+    }
     Serial.println(line);
   }
 
@@ -271,6 +274,10 @@ void AlarmClock::alarm_setup_act(const String &input)
   int enable = input.toInt();
   if(enable)
   {
+    if(0 > setup_alarm.secs_in_day)
+    {
+      setup_alarm.secs_in_day = 0;
+    }
     Serial.print(F("Enter the sound number: "));
     terminal.input(std::bind(&AlarmClock::alarm_setup_snd, this, std::placeholders::_1));
   }
