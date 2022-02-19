@@ -1,2 +1,5 @@
 .pio
 platformio.pro.user
+platformio.pro
+lib
+include
