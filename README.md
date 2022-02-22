@@ -1,8 +1,9 @@
 # HungerHorn
 
-There was a time in a hackerspace (ruum42.ch) as everyone got hungry. And so it was decided to go hunt for a Pizza. And the next Tuesday they all got hungry again. But this time not everyone was in for the hunt. Apparently it was too early. Last week, so the story goes, they all went at 19:00 o'clock and yet it was just 18:55. As social as the common hacker is, everyone waited patiently for 5 minutes before the hunt could begin. From this time on, the tradition was established. Hunger is at precisely 19:00 o'clock.
+Once upon a time in a hackerspace far far away, on a Tuesday, everyone got hungry. And so it was decided to go hunt for a Pizza. The next Tuesday after that, they all got hungry again. But this time not everyone was in for the hunt right away. Apparently it was too early. Last week, so some commented, they all went at 19:00 o'clock. But yet it was just 18:55.
+As social as the common hacker is, everyone waited patiently for the remaining 5 minutes before the hunt could begin. From this time on, the tradition was established. HungerTime™ is at precisely 19:00 o'clock.
 
-Since this story is about a hackerspace, we of course need to solve everything with technical measures. And so the project HungerHorn™ got started. It's supposed to sound an alarm signal precisely at HunterTime™, so nobody needs to stare at a watch the exciting minutes before.
+Since this story is about a hackerspace, we naturally need to solve everything with technical measures. And so the project HungerHorn™ got started. It's supposed to sound an alarm signal at precisely HunterTime™. Since, nobody needs to stare at a watch the exciting minutes before.
 
 
 ## Getting started
@@ -15,3 +16,5 @@ The software is written using the PlatformIO toolkit. I use Qt Creator as source
 
 After cloning the project, execute `platformio init --board lolin32_lite --ide qtcreator` in the project directory to initialize it. Adjust the command to your hardware board and IDE of choice. Then open the code in the `src/` directory and adjust the GPIOs if needed. Call `platformio run -t upload` to install it on your board.
 
+
+![overview image](img/overview_01.jpg)
