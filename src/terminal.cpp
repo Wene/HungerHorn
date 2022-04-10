@@ -21,12 +21,7 @@ void Terminal::tick(unsigned long now)
     int in_char = Serial.read();
     if(BACKSPACE == in_char)
     {
-      unsigned len = buffer.length();
-      if(0 < len)
-      {
-        buffer = buffer.substring(0, len-1);
-        backspace();
-      }
+      backspace();
     }
     else if(ENTER == in_char)
     {
@@ -68,10 +63,28 @@ void Terminal::input(std::function<void(const String&)> callback)
 
 void Terminal::backspace()
 {
-  Serial.write(ESC);
-  Serial.print("[D");
-  Serial.write(ESC);
-  Serial.print("[K");
+  if(0 < buffer.length())
+  {
+    bool multi_byte_char = false;
+    do
+    {
+      uint last_char_index = buffer.length() - 1;
+      char deleted_char = buffer.charAt(last_char_index);
+      buffer = buffer.substring(0, last_char_index);
+
+      // characters starting with 0b10xxxxxx are part of utf-8 multibyte characters
+      multi_byte_char = (deleted_char & 0b10000000) && !(deleted_char & 0b01000000);
+    }
+    while(multi_byte_char && 0 < buffer.length());
+
+    // move cursor left
+    Serial.write(ESC);
+    Serial.print("[D");
+
+    // clear the line from cursor to the right
+    Serial.write(ESC);
+    Serial.print("[K");
+  }
 }
 
 void Terminal::clear_serial_buffer()
