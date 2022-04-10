@@ -11,8 +11,7 @@
 static const char *alarm_time_prefix = "time_";
 static const char *alarm_sound_prefix = "sound_";
 static const char *ntp_name = "ntp";
-static const char *utc_offs_name = "utc_offset";
-static const char *dst_name = "dst_offset";
+static const char *tz_name = "tz";
 
 int Alarm::hour()
 {
@@ -45,7 +44,6 @@ void Alarm::hour(int new_val)
 
   secs_in_day = hour * 3600 + min * 60 + sec;
 }
-
 
 void Alarm::min(int new_val)
 {
@@ -112,15 +110,11 @@ void AlarmClock::setup()
   {
     ntp_server = settings->getString(ntp_name);
   }
-  if(settings->isKey(utc_offs_name))
+  if(settings->isKey(tz_name))
   {
-    utc_offset = settings->getLong(utc_offs_name);
+    tz_str = settings->getString(tz_name);
   }
-  if(settings->isKey(dst_name))
-  {
-    dst_offset = settings->getInt(dst_name);
-  }
-  configTime(utc_offset, dst_offset, ntp_server.c_str());
+  setup_time();
 }
 
 void AlarmClock::tick(unsigned long now)
@@ -163,52 +157,25 @@ void AlarmClock::config_ntp(const String &input)
     ntp_server = input;
   }
 
-  Serial.print(F("The current UTC offset in minutes is "));
-  Serial.println(utc_offset / 60);
-  Serial.print(F("Enter the new value or just hit enter to keep the value: "));
-  terminal.input(std::bind(&AlarmClock::config_utc, this, std::placeholders::_1));
+  Serial.print(F("The current timezone is \""));
+  Serial.print(tz_str);
+  Serial.println("\"");
+  Serial.println(F("Find your tomezone info here: https://github.com/nayarsystems/posix_tz_db/blob/master/zones.csv"));
+  Serial.print(F("Enter a new timezome (like \"CET-1CEST,M3.5.0,M10.5.0/3\") or just hit enter to keep the value: "));
+  terminal.input(std::bind(&AlarmClock::config_tz, this, std::placeholders::_1));
 }
 
-void AlarmClock::config_utc(const String &input)
+void AlarmClock::config_tz(const String &input)
 {
   if(!input.isEmpty())
   {
-    utc_offset = input.toInt() * 60;
-  }
-
-  Serial.print(F("Daylight saving time is "));
-  if(dst_offset)
-  {
-    Serial.println(F("enabled"));
-  }
-  else
-  {
-    Serial.println(F("disabled"));
-  }
-  Serial.print(F("Enter 1 to enable or 0 to disable. Hit enter to keep the setting: "));
-  terminal.input(std::bind(&AlarmClock::config_dst, this, std::placeholders::_1));
-}
-
-void AlarmClock::config_dst(const String &input)
-{
-  if(!input.isEmpty())
-  {
-    int enable_dst = input.toInt();
-    if(enable_dst)
-    {
-      dst_offset = 3600;
-    }
-    else
-    {
-      dst_offset = 0;
-    }
+    tz_str = input;
   }
 
   settings->putString(ntp_name, ntp_server);
-  settings->putLong(utc_offs_name, utc_offset);
-  settings->putInt(dst_name, dst_offset);
+  settings->putString(tz_name, tz_str);
 
-  configTime(utc_offset, dst_offset, ntp_server.c_str());
+  setup_time();
 }
 
 void AlarmClock::alarm_setup_start()
@@ -351,6 +318,13 @@ void AlarmClock::store_setup_alarm()
   sound_key += setup_index;
   settings->putUChar(sound_key.c_str(), alarm[setup_index].sound);
 
+}
+
+void AlarmClock::setup_time()
+{
+  configTime(0, 0, ntp_server.c_str());
+  setenv("TZ", tz_str.c_str(), 1);
+  tzset();
 }
 
 AlarmClock alarmclock;

@@ -33,8 +33,7 @@ public:
 
 private:
   String ntp_server;
-  long utc_offset;
-  int dst_offset;
+  String tz_str;
   Preferences *settings;
 
   Alarm alarm[NUM_ALARM];
@@ -45,10 +44,10 @@ private:
   void alarm_setup_snd(const String& input);
   void alarm_setup_time(const String& input);
   void store_setup_alarm();
+  void setup_time();
 
   void config_ntp(const String& input);
-  void config_utc(const String& input);
-  void config_dst(const String& input);
+  void config_tz(const String& input);
 
   int setup_index;
 
