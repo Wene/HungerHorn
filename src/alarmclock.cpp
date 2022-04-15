@@ -134,6 +134,12 @@ void AlarmClock::tick(unsigned long now)
       if(now_secs == alarm[i].secs_in_day && alarm[i].sound)
       {
         player.play_track(alarm[i].sound);
+
+        for(auto event : event_callbacks)
+        {
+          event();
+        }
+
         lightshow.event();
         last_update += 10000;
       }
@@ -318,6 +324,11 @@ void AlarmClock::store_setup_alarm()
   sound_key += setup_index;
   settings->putUChar(sound_key.c_str(), alarm[setup_index].sound);
 
+}
+
+void AlarmClock::add_event_callback(std::function<void(void)> event)
+{
+  event_callbacks.push_back(event);
 }
 
 void AlarmClock::setup_time()

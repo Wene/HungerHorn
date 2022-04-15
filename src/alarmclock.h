@@ -1,6 +1,8 @@
 #pragma once
 
 #include <Arduino.h>
+#include <functional>
+#include <vector>
 
 #define NUM_ALARM 10
 
@@ -30,6 +32,7 @@ public:
   void config_start();
   void alarm_setup_start();
   void print_time();
+  void add_event_callback(std::function<void(void)> event);
 
 private:
   String ntp_server;
@@ -38,6 +41,8 @@ private:
 
   Alarm alarm[NUM_ALARM];
   Alarm setup_alarm;
+
+  std::vector<std::function<void(void)>> event_callbacks;
 
   void alarm_setup_no(const String& input);
   void alarm_setup_act(const String& input);
