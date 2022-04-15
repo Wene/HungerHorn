@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <functional>
 
 #include "player.h"
 #include "terminal.h"
@@ -55,6 +56,8 @@ void setup()
   network.setup();
   alarmclock.setup();
   player.setup();
+
+  alarmclock.add_event_callback(std::bind(&Lightshow::event, &lightshow));
 
   Serial.println(F("Setup done."));
   menu_display();

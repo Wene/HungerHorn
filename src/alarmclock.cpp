@@ -6,7 +6,6 @@
 
 #include "terminal.h"
 #include "player.h"
-#include "lightshow.h"
 
 static const char *alarm_time_prefix = "time_";
 static const char *alarm_sound_prefix = "sound_";
@@ -140,7 +139,6 @@ void AlarmClock::tick(unsigned long now)
           event();
         }
 
-        lightshow.event();
         last_update += 10000;
       }
     }
