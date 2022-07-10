@@ -20,7 +20,7 @@ difference(){
 }
 
 for(dist = [part : part : 5*part]){
-    translate([dist, 0, -4]){
-        cube([thick, part, 8], true);
+    translate([dist, 0, -2.5]){
+        cube([thick, part, 5], center=true);
     }
 }

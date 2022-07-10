@@ -1,27 +1,25 @@
 $fn = 100;
 
 difference(){
-    linear_extrude(height=3, center=false){
-        import("case.dxf", layer="top_grid");
-    }
-    linear_extrude(height=4, center=true){
-        import("case.dxf", layer="groove");
-    }
-}
-
-
-translate([0,0,-2.5]){
-    difference(){
-        linear_extrude(height=5, center=true){
-            import("case.dxf", layer="top_wall");
+    union(){
+        linear_extrude(height=3){
+            import("case.dxf", layer="top_grid");
         }
-        linear_extrude(height=6, center=true){
+        translate([0,0,-5]){
+            linear_extrude(height=5){
+                import("case.dxf", layer="top_ridge");
+            }
+        }
+        translate([0,0,-12]){
+            linear_extrude(height=12){
+                import("case.dxf", layer="top_cable");
+            }
+        }
+    }
+
+    translate([0,0,-1]){
+        linear_extrude(height=3){
             import("case.dxf", layer="groove");
         }
-    }
-}
-translate([0,0,-7]){
-    linear_extrude(height=7, center=false){
-        import("case.dxf", layer="top_ridge");
     }
 }
