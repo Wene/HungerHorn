@@ -17,8 +17,8 @@ difference(){
         }
     }
 
-    translate([0,0,-1]){
-        linear_extrude(height=3){
+    translate([0,0,-0.1]){
+        linear_extrude(height=2.1){
             import("case.dxf", layer="groove");
         }
     }
