@@ -2,7 +2,7 @@ $fn = 100;
 
 part=100/6;
 border=3;
-thick=1.5;
+thick=3;
 numbers = ["32", "16", "8", "4", "2", "1"];
 
 difference(){
@@ -12,7 +12,7 @@ difference(){
 
     for(i = [0 : 1 : 5]){
         translate([i*part+part/2, 0, -0.1]){
-            linear_extrude(1.1){
+            linear_extrude(thick-0.3+0.1){
                 text(numbers[i], 8, valign="center", halign="center");
             }
         }
@@ -20,7 +20,7 @@ difference(){
 }
 
 for(dist = [part : part : 5*part]){
-    translate([dist, 0, -2.5]){
-        cube([thick, part, 5], center=true);
+    translate([dist, 0, -3.5]){
+        cube([1.5, part, 7], center=true);
     }
 }
