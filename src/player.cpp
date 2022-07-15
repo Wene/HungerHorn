@@ -1,4 +1,5 @@
 #include "player.h"
+#include <Arduino.h>
 #include <DFRobotDFPlayerMini.h>
 
 struct player_impl
@@ -8,7 +9,7 @@ struct player_impl
   void check_state();
 };
 
-Player::Player(): impl(new player_impl)
+Player::Player(): impl{new player_impl}
 {
 
 }
@@ -37,14 +38,17 @@ void Player::setup()
         break;
       }
     }
-    delay(1000);
+    else
+    {
+      impl->player.reset();
+    }
+    delay(5000);
   }
 
   impl->player.setTimeOut(500);
   impl->player.volume(20);  // 0-30
   impl->player.EQ(DFPLAYER_EQ_NORMAL);
   impl->player.outputDevice(DFPLAYER_DEVICE_SD);
-
 }
 
 void Player::play_track(int number)

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <Arduino.h>
-
 struct player_impl;
 
 class Player
