@@ -21,5 +21,8 @@ difference(){
         linear_extrude(height=2.1){
             import("case.dxf", layer="groove");
         }
+        linear_extrude(height=2.1){
+            import("case.dxf", layer="speaker_top");
+        }
     }
 }
