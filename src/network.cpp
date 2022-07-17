@@ -189,7 +189,10 @@ void Network::select(const String &input)
 
   if(input == "d")
   {
-    wifi_list.erase(wifi_list.begin() + config_slot);
+    if(config_slot < wifi_list.size())
+    {
+      wifi_list.erase(wifi_list.begin() + config_slot);
+    }
 
     for(unsigned long i = config_slot; i < wifi_list.size(); i++)
     {
