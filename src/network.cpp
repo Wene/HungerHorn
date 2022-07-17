@@ -39,6 +39,10 @@ void Network::setup()
       config.psk = settings->getString(psk_key.c_str());
       wifi_list.push_back(config);
     }
+    else
+    {
+      break;
+    }
 
     index++;
   }
