@@ -89,20 +89,27 @@ void AlarmClock::setup()
 {
   settings->begin("alarm");
 
-  for(int i = 0; i < NUM_ALARM; i++)
+  int index = 0;
+  while(true)
   {
     String time_key(alarm_time_prefix);
-    time_key += i;
-    if(settings->isKey(time_key.c_str()))
-    {
-      alarm[i].secs_in_day = settings->getInt(time_key.c_str());
-    }
+    time_key += index;
     String sound_key(alarm_sound_prefix);
-    sound_key += i;
-    if(settings->isKey(sound_key.c_str()))
+    sound_key += index;
+
+    if(settings->isKey(time_key.c_str()) && settings->isKey(sound_key.c_str()))
     {
-      alarm[i].sound = settings->getUChar(sound_key.c_str());
+      Alarm alarm;
+      alarm.secs_in_day = settings->getInt(time_key.c_str());
+      alarm.sound = settings->getUChar(sound_key.c_str());
+      alarm_list.push_back(alarm);
     }
+    else
+    {
+      break;
+    }
+
+    index++;
   }
 
   if(settings->isKey(ntp_name))
@@ -126,13 +133,13 @@ void AlarmClock::tick(unsigned long now)
     struct tm *timeinfo = localtime(&clock);
     int32_t now_secs = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
 
-    for(int i = 0; i < NUM_ALARM; i++)
+    for(Alarm& alarm : alarm_list)
     {
-      if(now_secs == alarm[i].secs_in_day && alarm[i].sound)
+      if(now_secs == alarm.secs_in_day && alarm.sound)
       {
-        player.play_track(alarm[i].sound);
+        player.play_track(alarm.sound);
 
-        for(auto event : event_callbacks)
+        for(auto& event : event_callbacks)
         {
           event();
         }
@@ -185,21 +192,22 @@ void AlarmClock::alarm_setup_start()
   Serial.println();
   Serial.println(F("No | Active | Sound | Time"));
 
-  for(int i = 0; i < NUM_ALARM; i++)
+  int index = 0;
+  for(Alarm& alarm : alarm_list)
   {
-    String line(i);
+    String line{index++};
     line += "  : ";
 
-    bool active = alarm[i].secs_in_day >= 0;
+    bool active = alarm.secs_in_day >= 0;
     line += active ? "yes    : " : "no     : ";
 
     char c_str[10];
-    snprintf(c_str, sizeof(c_str), "%-6d: ", alarm[i].sound);
+    snprintf(c_str, sizeof(c_str), "%-6d: ", alarm.sound);
     line += c_str;
 
     if(active)
     {
-      snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm[i].hour(), alarm[i].min(), alarm[i].sec());
+      snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm.hour(), alarm.min(), alarm.sec());
       line += c_str;
     }
     else
@@ -209,7 +217,7 @@ void AlarmClock::alarm_setup_start()
     Serial.println(line);
   }
 
-  Serial.print(F("Enter a number to edit, hit enter to abort: "));
+  Serial.print(F("Enter a number to edit, 'a' to add a new entry, or hit enter to abort: "));
   terminal.input(std::bind(&AlarmClock::alarm_setup_no, this, std::placeholders::_1));
 }
 
@@ -220,12 +228,21 @@ void AlarmClock::alarm_setup_no(const String &input)
     return;
   }
 
-  setup_index = input.toInt();
-  if(setup_index >= 0 && setup_index < NUM_ALARM)
+  if(input == "a")
+  {
+    setup_index = alarm_list.size();
+    alarm_list.emplace_back(Alarm{});
+  }
+  else
+  {
+    setup_index = input.toInt();
+  }
+
+  if(setup_index >= 0 && setup_index < alarm_list.size())
   {
     Serial.print(F("Enter 1 to enable, 0 to disable: "));
     terminal.input(std::bind(&AlarmClock::alarm_setup_act, this, std::placeholders::_1));
-    setup_alarm = alarm[setup_index];
+    setup_alarm = alarm_list[setup_index];
   }
   else
   {
@@ -311,15 +328,14 @@ void AlarmClock::print_time()
 
 void AlarmClock::store_setup_alarm()
 {
-  alarm[setup_index] = setup_alarm;
+  alarm_list[setup_index] = setup_alarm;
 
   String time_key(alarm_time_prefix);
   time_key += setup_index;
-  settings->putInt(time_key.c_str(), alarm[setup_index].secs_in_day);
+  settings->putInt(time_key.c_str(), setup_alarm.secs_in_day);
   String sound_key(alarm_sound_prefix);
   sound_key += setup_index;
-  settings->putUChar(sound_key.c_str(), alarm[setup_index].sound);
-
+  settings->putUChar(sound_key.c_str(), setup_alarm.sound);
 }
 
 void AlarmClock::add_event_callback(std::function<void(void)> event)

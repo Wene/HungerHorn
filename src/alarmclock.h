@@ -4,13 +4,11 @@
 #include <functional>
 #include <vector>
 
-#define NUM_ALARM 10
-
 class Preferences;
 
 struct Alarm
 {
-  Alarm(): secs_in_day(-1) {};
+  Alarm(): secs_in_day{-1} {};
   int32_t secs_in_day;
   uint8_t sound;
   int hour();
@@ -39,7 +37,7 @@ private:
   String tz_str;
   Preferences *settings;
 
-  Alarm alarm[NUM_ALARM];
+  std::vector<Alarm> alarm_list;
   Alarm setup_alarm;
 
   std::vector<std::function<void(void)>> event_callbacks;
@@ -54,7 +52,7 @@ private:
   void config_ntp(const String& input);
   void config_tz(const String& input);
 
-  int setup_index;
+  unsigned long setup_index;
 
   unsigned long last_update;
 };
