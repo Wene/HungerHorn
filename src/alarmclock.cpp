@@ -190,7 +190,7 @@ void AlarmClock::config_tz(const String &input)
 void AlarmClock::alarm_setup_start()
 {
   Serial.println();
-  Serial.println(F("No | Active | Sound | Time"));
+  Serial.println(F("No | Sound | Time"));
 
   int index = 0;
   for(Alarm& alarm : alarm_list)
@@ -198,22 +198,13 @@ void AlarmClock::alarm_setup_start()
     String line{index++};
     line += "  : ";
 
-    bool active = alarm.secs_in_day >= 0;
-    line += active ? "yes    : " : "no     : ";
-
     char c_str[10];
     snprintf(c_str, sizeof(c_str), "%-6d: ", alarm.sound);
     line += c_str;
 
-    if(active)
-    {
-      snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm.hour(), alarm.min(), alarm.sec());
-      line += c_str;
-    }
-    else
-    {
-      line += "---";
-    }
+    snprintf(c_str, sizeof(c_str), "%02d:%02d:%02d", alarm.hour(), alarm.min(), alarm.sec());
+    line += c_str;
+
     Serial.println(line);
   }
 
@@ -240,37 +231,13 @@ void AlarmClock::alarm_setup_no(const String &input)
 
   if(setup_index >= 0 && setup_index < alarm_list.size())
   {
-    Serial.print(F("Enter 1 to enable, 0 to disable: "));
-    terminal.input(std::bind(&AlarmClock::alarm_setup_act, this, std::placeholders::_1));
+    Serial.print(F("Enter the sound number or 'd' to delete this alarm: "));
+    terminal.input(std::bind(&AlarmClock::alarm_setup_snd, this, std::placeholders::_1));
     setup_alarm = alarm_list[setup_index];
   }
   else
   {
     Serial.println(F("selection out of range"));
-  }
-}
-
-void AlarmClock::alarm_setup_act(const String &input)
-{
-  if(input.isEmpty())
-  {
-    return;
-  }
-
-  int enable = input.toInt();
-  if(enable)
-  {
-    if(0 > setup_alarm.secs_in_day)
-    {
-      setup_alarm.secs_in_day = 0;
-    }
-    Serial.print(F("Enter the sound number: "));
-    terminal.input(std::bind(&AlarmClock::alarm_setup_snd, this, std::placeholders::_1));
-  }
-  else
-  {
-    setup_alarm.secs_in_day = -1;
-    store_setup_alarm();
   }
 }
 
@@ -281,9 +248,27 @@ void AlarmClock::alarm_setup_snd(const String &input)
     return;
   }
 
-  setup_alarm.sound = input.toInt();
-  Serial.print(F("Enter the alarm time: "));
-  terminal.input(std::bind(&AlarmClock::alarm_setup_time, this, std::placeholders::_1));
+  if(input == "d")
+  {
+    alarm_list.erase(alarm_list.begin() + setup_index);
+    for(unsigned long i = setup_index; i < alarm_list.size(); i++)
+    {
+      Alarm& alarm = alarm_list[i];
+      store_alarm(alarm, i);
+    }
+    String time_key(alarm_time_prefix);
+    time_key += alarm_list.size();
+    settings->remove(time_key.c_str());
+    String sound_key(alarm_sound_prefix);
+    sound_key += alarm_list.size();
+    settings->remove(sound_key.c_str());
+  }
+  else
+  {
+    setup_alarm.sound = input.toInt();
+    Serial.print(F("Enter the alarm time: "));
+    terminal.input(std::bind(&AlarmClock::alarm_setup_time, this, std::placeholders::_1));
+  }
 }
 
 void AlarmClock::alarm_setup_time(const String &input)
@@ -315,7 +300,9 @@ void AlarmClock::alarm_setup_time(const String &input)
     setup_alarm.sec(sec_str.toInt());
   }
 
-  store_setup_alarm();
+  alarm_list[setup_index] = setup_alarm;
+
+  store_alarm(setup_alarm, setup_index);
 }
 
 void AlarmClock::print_time()
@@ -326,21 +313,19 @@ void AlarmClock::print_time()
   Serial.println(timeinfo, "%Y-%m-%d %H:%M:%S");
 }
 
-void AlarmClock::store_setup_alarm()
-{
-  alarm_list[setup_index] = setup_alarm;
-
-  String time_key(alarm_time_prefix);
-  time_key += setup_index;
-  settings->putInt(time_key.c_str(), setup_alarm.secs_in_day);
-  String sound_key(alarm_sound_prefix);
-  sound_key += setup_index;
-  settings->putUChar(sound_key.c_str(), setup_alarm.sound);
-}
-
 void AlarmClock::add_event_callback(std::function<void(void)> event)
 {
   event_callbacks.push_back(event);
+}
+
+void AlarmClock::store_alarm(const Alarm& alarm, unsigned long index)
+{
+  String time_key(alarm_time_prefix);
+  time_key += index;
+  settings->putInt(time_key.c_str(), alarm.secs_in_day);
+  String sound_key(alarm_sound_prefix);
+  sound_key += index;
+  settings->putUChar(sound_key.c_str(), alarm.sound);
 }
 
 void AlarmClock::setup_time()

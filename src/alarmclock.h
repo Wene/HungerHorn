@@ -43,10 +43,9 @@ private:
   std::vector<std::function<void(void)>> event_callbacks;
 
   void alarm_setup_no(const String& input);
-  void alarm_setup_act(const String& input);
   void alarm_setup_snd(const String& input);
   void alarm_setup_time(const String& input);
-  void store_setup_alarm();
+  void store_alarm(const Alarm& alarm, unsigned long index);
   void setup_time();
 
   void config_ntp(const String& input);
