@@ -1,10 +1,15 @@
 #pragma once
 
 #include <Arduino.h>
-
-#define NUM_WIFI 5
+#include <vector>
 
 class Preferences;
+
+struct WifiConfig
+{
+  String ssid;
+  String psk;
+};
 
 class Network
 {
@@ -23,14 +28,12 @@ private:
   void search();
   void connect();
   int num_net;
-  int slot;
+  unsigned long slot;
   bool setup_active;
-  String active_ssid;
-  String active_psk;
   unsigned long last_tick;
   uint32_t connecting_countdown;
-  String ssid_list[NUM_WIFI];
-  String psk_list[NUM_WIFI];
+  std::vector<WifiConfig> wifi_list;
+  WifiConfig active_config;
 };
 
 extern Network network;
