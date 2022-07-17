@@ -167,15 +167,26 @@ void Network::scan(const String &input)
 
   Serial.println(F("Scanning for WiFi networks..."));
   num_net = WiFi.scanNetworks();
-  Serial.print(F("Scan complete. Found "));
-  Serial.print(num_net);
-  Serial.println(F(" networks:"));
-  for(int i = 0; i < num_net; i++)
+  if(num_net < 0)
   {
-    String name = String(i) + ": " + WiFi.SSID(i);
-    Serial.println(name);
+    num_net = 0;
+    Serial.println(F("WiFi scan failed or no networks found."));
+    Serial.print(F("Enter 'd' to delete this slot, or just hit enter to abort: "));
   }
-  Serial.print(F("Enter the network number of your choice, 'd' to delete this slot, or just hit enter to abort: "));
+  else
+  {
+    Serial.print(F("Scan complete. Found "));
+    Serial.print(num_net);
+    Serial.println(F(" networks:"));
+
+    for(int i = 0; i < num_net; i++)
+    {
+      String name = String(i) + ": " + WiFi.SSID(i);
+      Serial.println(name);
+    }
+
+    Serial.print(F("Enter the network number of your choice, 'd' to delete this slot, or just hit enter to abort: "));
+  }
   terminal.input(std::bind(&Network::select, this, std::placeholders::_1));
 }
 
