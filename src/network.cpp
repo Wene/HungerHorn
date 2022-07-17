@@ -176,7 +176,7 @@ void Network::scan(const String &input)
     String name = String(i) + ": " + WiFi.SSID(i);
     Serial.println(name);
   }
-  Serial.print(F("Enter the number of your choice or just hit enter to abort: "));
+  Serial.print(F("Enter the network number of your choice, 'd' to delete this slot, or just hit enter to abort: "));
   terminal.input(std::bind(&Network::select, this, std::placeholders::_1));
 }
 
@@ -188,19 +188,39 @@ void Network::select(const String &input)
     return;
   }
 
-  int net_number = input.toInt();
-  if(net_number >= 0 && net_number < num_net)
+  if(input == "d")
   {
-    active_config.ssid = WiFi.SSID(net_number);
+    wifi_list.erase(wifi_list.begin() + config_slot);
 
-    Serial.print(F("Enter the network password for \""));
-    Serial.print(active_config.ssid);
-    Serial.print("\": ");
-    terminal.input(std::bind(&Network::password, this, std::placeholders::_1));
+    for(unsigned long i = config_slot; i < wifi_list.size(); i++)
+    {
+      WifiConfig& config = wifi_list[i];
+      store_config(config, i);
+    }
+
+    String ssid_key{ssid_prefix};
+    ssid_key += wifi_list.size();
+    String psk_key{psk_prefix};
+    psk_key += wifi_list.size();
+    settings->remove(ssid_key.c_str());
+    settings->remove(psk_key.c_str());
   }
   else
   {
-    Serial.println(F("Invalid selection"));
+    int net_number = input.toInt();
+    if(net_number >= 0 && net_number < num_net)
+    {
+      active_config.ssid = WiFi.SSID(net_number);
+
+      Serial.print(F("Enter the network password for \""));
+      Serial.print(active_config.ssid);
+      Serial.print("\": ");
+      terminal.input(std::bind(&Network::password, this, std::placeholders::_1));
+    }
+    else
+    {
+      Serial.println(F("Invalid selection"));
+    }
   }
 }
 
@@ -208,15 +228,21 @@ void Network::password(const String &input)
 {
   active_config.psk = input;
 
-  String ssid_key{ssid_prefix};
-  ssid_key += config_slot;
-  String psk_key{psk_prefix};
-  psk_key += config_slot;
-  settings->putString(ssid_key.c_str(), active_config.ssid);
-  settings->putString(psk_key.c_str(), active_config.psk);
+  wifi_list[config_slot] = active_config;
+  store_config(active_config, config_slot);
 
   connect();
   setup_active = false;
+}
+
+void Network::store_config(WifiConfig& config, unsigned long index)
+{
+  String ssid_key{ssid_prefix};
+  ssid_key += index;
+  String psk_key{psk_prefix};
+  psk_key += index;
+  settings->putString(ssid_key.c_str(), config.ssid);
+  settings->putString(psk_key.c_str(), config.psk);
 }
 
 Network network;

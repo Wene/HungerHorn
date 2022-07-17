@@ -27,6 +27,7 @@ private:
   void password(const String &input);
   void search();
   void connect();
+  void store_config(WifiConfig& config, unsigned long index);
   bool setup_active;
   unsigned long config_slot;
   unsigned long last_tick;
