@@ -152,14 +152,13 @@ void Network::scan(const String &input)
   if(input == "a")
   {
     config_slot = wifi_list.size();
-    wifi_list.emplace_back(WifiConfig{});
   }
   else
   {
     config_slot = input.toInt();
   }
 
-  if(config_slot >= wifi_list.size())
+  if(config_slot > wifi_list.size())
   {
     Serial.println(F("Not a valid slot number"));
     setup_active = false;
@@ -228,7 +227,15 @@ void Network::password(const String &input)
 {
   active_config.psk = input;
 
-  wifi_list[config_slot] = active_config;
+  if(config_slot >= wifi_list.size())
+  {
+    wifi_list.push_back(active_config);
+  }
+  else
+  {
+    wifi_list[config_slot] = active_config;
+  }
+
   store_config(active_config, config_slot);
 
   connect();
