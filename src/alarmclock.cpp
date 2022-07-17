@@ -74,7 +74,7 @@ void Alarm::sec(int new_val)
   secs_in_day = hour * 3600 + min * 60 + sec;
 }
 
-AlarmClock::AlarmClock(): ntp_server("pool.ntp.org"), settings(new Preferences())
+AlarmClock::AlarmClock(): ntp_server{"pool.ntp.org"}, settings{new Preferences}
 {
 
 }
@@ -118,7 +118,7 @@ void AlarmClock::setup()
 
 void AlarmClock::tick(unsigned long now)
 {
-  if(now >= last_update + 1000)
+  if(now >= last_update + 1000ul)
   {
     last_update = now;
 
@@ -139,7 +139,7 @@ void AlarmClock::tick(unsigned long now)
           event();
         }
 
-        last_update += 10000;
+        last_update += 10000ul;
       }
     }
   }

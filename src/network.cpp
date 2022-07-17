@@ -11,7 +11,7 @@ static const char *psk_prefix = "psk_";
 
 Network::Network()
 {
-  settings = new Preferences();
+  settings = new Preferences;
 }
 
 Network::~Network()
