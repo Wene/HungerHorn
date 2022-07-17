@@ -122,14 +122,12 @@ void AlarmClock::tick(unsigned long now)
   {
     last_update = now;
 
+    time_t clock = time(NULL);
+    struct tm *timeinfo = localtime(&clock);
+    int32_t now_secs = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
+
     for(int i = 0; i < NUM_ALARM; i++)
     {
-      if(alarm[i].secs_in_day < 0) continue;
-
-      time_t clock = time(NULL);
-      struct tm *timeinfo = localtime(&clock);
-      int32_t now_secs = timeinfo->tm_hour * 3600 + timeinfo->tm_min * 60 + timeinfo->tm_sec;
-
       if(now_secs == alarm[i].secs_in_day && alarm[i].sound)
       {
         player.play_track(alarm[i].sound);
