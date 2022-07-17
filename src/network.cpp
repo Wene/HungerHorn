@@ -133,7 +133,7 @@ void Network::config_start()
     line += "\"";
     Serial.println(line);
   }
-  Serial.print(F("Select the network number to edit: "));
+  Serial.print(F("Select the network number to edit or enter 'a' to add a new network: "));
   terminal.input(std::bind(&Network::scan, this, std::placeholders::_1));
   setup_active = true;
 }
@@ -145,8 +145,17 @@ void Network::scan(const String &input)
     return;
   }
 
-  slot = input.toInt();
-  if(slot >= wifi_list.size())
+  if(input == "a")
+  {
+    config_slot = wifi_list.size();
+    wifi_list.emplace_back(WifiConfig{});
+  }
+  else
+  {
+    config_slot = input.toInt();
+  }
+
+  if(config_slot >= wifi_list.size())
   {
     Serial.println(F("Not a valid slot number"));
     setup_active = false;
@@ -196,9 +205,9 @@ void Network::password(const String &input)
   active_config.psk = input;
 
   String ssid_key{ssid_prefix};
-  ssid_key += slot;
+  ssid_key += config_slot;
   String psk_key{psk_prefix};
-  psk_key += slot;
+  psk_key += config_slot;
   settings->putString(ssid_key.c_str(), active_config.ssid);
   settings->putString(psk_key.c_str(), active_config.psk);
 

@@ -27,10 +27,10 @@ private:
   void password(const String &input);
   void search();
   void connect();
-  int num_net;
-  unsigned long slot;
   bool setup_active;
+  unsigned long config_slot;
   unsigned long last_tick;
+  int num_net;
   uint32_t connecting_countdown;
   std::vector<WifiConfig> wifi_list;
   WifiConfig active_config;
