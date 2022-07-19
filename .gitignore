@@ -1,6 +1,7 @@
 .pio
-platformio.pro.user
-platformio.pro
+platformio.*
+!platformio.ini
+Makefile
 lib
 include
 *.stl
