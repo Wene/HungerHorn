@@ -2,15 +2,15 @@
 #include <FastLED.h>
 #include <time.h>
 
-#define NUM_LEDS 6
-#define LED_PIN 23
+constexpr int num_leds = 6;
+constexpr int leds_pin = 23;
 
-CRGBArray<NUM_LEDS> leds;
+CRGBArray<num_leds> leds;
 
 void Lightshow::setup()
 {
   FastLED.setBrightness(80);
-  FastLED.addLeds<WS2812, LED_PIN, GRB>(leds, NUM_LEDS);
+  FastLED.addLeds<WS2812, leds_pin, GRB>(leds, leds.size());
 
   FastLED.clear(true);
   FastLED.show();
@@ -55,26 +55,27 @@ void Lightshow::tick(unsigned long now)
     if(event_countdown)
     {
       event_countdown--;
-      uint8_t color = (event_countdown / 10) % NUM_LEDS;
-      uint8_t step = 255 / NUM_LEDS;
+      uint8_t color = (event_countdown / 10) % leds.size();
+      uint8_t step = 255 / leds.size();
       color *= step;
-      for(int i = 0; i < NUM_LEDS; i++)
+      for(auto& led: leds)
       {
-        leds[i].setHSV(color, 255, 255);
+        led.setHSV(color, 255, 255);
         color += step;
       }
     }
     else
     {
-      for(int i = 0; i < NUM_LEDS; i++)
+      uint8_t pos = 0;
+      for(auto& led : leds)
       {
-        if(display_value & 1 << i)
+        if(display_value & 1 << pos++)
         {
-          leds[i].setHSV(display_color, 255, 255);
+          led.setHSV(display_color, 255, 255);
         }
         else
         {
-          leds[i].fadeToBlackBy(10);
+          led.fadeToBlackBy(10);
         }
       }
     }
