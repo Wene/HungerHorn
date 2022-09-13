@@ -13,6 +13,10 @@ void Lightshow::setup()
   FastLED.addLeds<WS2812, leds_pin, GRB>(leds, leds.size());
 
   FastLED.clear(true);
+  for(auto& led : leds)
+  {
+    led.setRGB(255, 0, 255);
+  }
   FastLED.show();
 }
 
